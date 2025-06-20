@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>声音合成 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 32px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #00E5FF;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: #00E5FF;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tool-button {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(124, 77, 255, 0.4);
+        }
+
+        .tool-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        /* 左侧工作区 */
+        .workspace {
+            display: grid;
+            gap: 24px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 文本输入区 */
+        .text-input {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        .text-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #90A4AE;
+        }
+
+        .input-tools {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* 音色角色选择 */
+        .voice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .voice-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(79, 195, 247, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .voice-item:hover {
+            border-color: #00A8FF;
+            transform: scale(1.02);
+        }
+
+        .voice-item.active {
+            border-color: #00E5FF;
+            background: rgba(0, 229, 255, 0.2);
+        }
+
+        .voice-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .voice-name {
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 4px;
+        }
+
+        .voice-details {
+            font-size: 12px;
+            color: #B0BEC5;
+            line-height: 1.4;
+        }
+
+        .voice-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .voice-btn {
+            background: rgba(0, 168, 255, 0.2);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 6px;
+            padding: 4px 12px;
+            color: #00A8FF;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .voice-btn:hover {
+            background: rgba(0, 168, 255, 0.3);
+        }
+
+        /* 右侧预览和设置区 */
+        .sidebar {
+            display: grid;
+            gap: 24px;
+            height: fit-content;
+        }
+
+        /* 音频预览 */
+        .audio-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .waveform {
+            height: 80px;
+            background: rgba(0, 168, 255, 0.1);
+            border-radius: 8px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform-bars {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 100%;
+        }
+
+        .waveform-bar {
+            width: 3px;
+            background: #00A8FF;
+            border-radius: 2px;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { height: 20%; }
+            50% { height: 80%; }
+        }
+
+        .audio-info {
+            display: grid;
+            gap: 8px;
+            margin: 16px 0;
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .audio-controls {
+            display: grid;
+            gap: 8px;
+        }
+
+        /* 音色设置 */
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            display: block;
+            font-size: 14px;
+            color: #B0BEC5;
+            margin-bottom: 8px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #00A8FF;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 60px;
+            font-size: 14px;
+            color: #00E5FF;
+            text-align: center;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .radio-item input[type="radio"] {
+            accent-color: #00A8FF;
+        }
+
+        /* 背景音乐 */
+        .music-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .music-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .music-item:hover {
+            border-color: #00A8FF;
+        }
+
+        .music-item.active {
+            border-color: #00E5FF;
+            background: rgba(0, 229, 255, 0.2);
+        }
+
+        /* 底部按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .voice-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .music-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <a href="free-creation.html" class="back-button">
+                <span>←</span>
+                <span>返回类型选择</span>
+            </a>
+            <h1 class="page-title">🎵 声音合成</h1>
+            <div></div>
+        </header>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <button class="tool-button" onclick="synthesizeAudio()">开始合成</button>
+            <button class="tool-button" onclick="playAudio()">试听播放</button>
+            <button class="tool-button secondary" onclick="batchProcess()">批量处理</button>
+            <button class="tool-button secondary" onclick="audioEdit()">音频编辑</button>
+            <button class="tool-button secondary" onclick="shareAudio()">分享作品</button>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 左侧工作区 -->
+            <div class="workspace">
+                <!-- 文本输入 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>📝</span>
+                        <span>文本输入</span>
+                    </h3>
+                    
+                    <textarea 
+                        class="text-input" 
+                        placeholder="请输入要转换为语音的文本内容..."
+                        oninput="updateTextInfo()"
+                        id="textInput"
+                    >亲爱的朋友们，欢迎来到魔法森林！我是你们的向导小精灵，今天我们将一起探索这个神奇的世界。在这里，每一棵树都有自己的故事，每一朵花都有独特的魔法力量...</textarea>
+                    
+                    <div class="text-info">
+                        <span>字数统计: <span id="charCount">68</span>字</span>
+                        <span>预估时长: ~<span id="estimatedTime">35</span>秒</span>
+                    </div>
+
+                    <div class="input-tools">
+                        <button class="tool-button" onclick="voiceInput()">🎤 语音输入</button>
+                        <button class="tool-button" onclick="importText()">📋 导入文本</button>
+                        <button class="tool-button secondary" onclick="aiEnhance()">💡 AI润色文本</button>
+                        <button class="tool-button secondary" onclick="clearText()">🔄 清空重写</button>
+                    </div>
+                </div>
+
+                <!-- 音色角色选择 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>👥</span>
+                        <span>音色角色</span>
+                    </h3>
+                    
+                    <div class="voice-grid">
+                        <div class="voice-item active" data-voice="girl">
+                            <span class="voice-icon">👧</span>
+                            <div class="voice-name">小女孩</div>
+                            <div class="voice-details">
+                                年龄: 8-12岁<br>
+                                特点: 甜美、天真
+                            </div>
+                            <div class="voice-actions">
+                                <button class="voice-btn" onclick="previewVoice('girl')">试听</button>
+                                <button class="voice-btn" onclick="selectVoice('girl')">选择</button>
+                            </div>
+                        </div>
+
+                        <div class="voice-item" data-voice="boy">
+                            <span class="voice-icon">👦</span>
+                            <div class="voice-name">小男孩</div>
+                            <div class="voice-details">
+                                年龄: 8-12岁<br>
+                                特点: 活泼、调皮
+                            </div>
+                            <div class="voice-actions">
+                                <button class="voice-btn" onclick="previewVoice('boy')">试听</button>
+                                <button class="voice-btn" onclick="selectVoice('boy')">选择</button>
+                            </div>
+                        </div>
+
+                        <div class="voice-item" data-voice="fairy">
+                            <span class="voice-icon">🧚‍♀️</span>
+                            <div class="voice-name">魔法精灵</div>
+                            <div class="voice-details">
+                                特殊音色<br>
+                                特点: 神秘、优雅
+                            </div>
+                            <div class="voice-actions">
+                                <button class="voice-btn" onclick="previewVoice('fairy')">试听</button>
+                                <button class="voice-btn" onclick="selectVoice('fairy')">选择</button>
+                            </div>
+                        </div>
+
+                        <div class="voice-item" data-voice="narrator">
+                            <span class="voice-icon">🎭</span>
+                            <div class="voice-name">旁白</div>
+                            <div class="voice-details">
+                                成人音色<br>
+                                特点: 沉稳、清晰
+                            </div>
+                            <div class="voice-actions">
+                                <button class="voice-btn" onclick="previewVoice('narrator')">试听</button>
+                                <button class="voice-btn" onclick="selectVoice('narrator')">选择</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-tools">
+                        <button class="tool-button secondary" onclick="moreVoices()">更多音色</button>
+                        <button class="tool-button secondary" onclick="customVoice()">自定义音色</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧预览和设置区 -->
+            <div class="sidebar">
+                <!-- 音频预览 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>🎵</span>
+                        <span>音频预览</span>
+                    </h3>
+                    
+                    <div class="audio-preview">
+                        <div style="font-size: 24px; margin-bottom: 8px;">🎤</div>
+                        
+                        <div class="waveform">
+                            <div class="waveform-bars">
+                                <div class="waveform-bar" style="animation-delay: 0s; height: 30%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.1s; height: 60%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.2s; height: 40%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.3s; height: 80%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.4s; height: 20%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.5s; height: 70%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.6s; height: 50%;"></div>
+                                <div class="waveform-bar" style="animation-delay: 0.7s; height: 90%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="audio-info">
+                            <div class="info-row">
+                                <span>时长:</span>
+                                <span id="audioDuration">00:35</span>
+                            </div>
+                            <div class="info-row">
+                                <span>文件:</span>
+                                <span>audio_001.mp3</span>
+                            </div>
+                        </div>
+
+                        <div class="audio-controls">
+                            <button class="btn btn-primary" onclick="playGeneratedAudio()">▶️ 播放</button>
+                            <button class="btn btn-secondary" onclick="regenerateAudio()">🔄 重新生成</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 音色设置 */
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>🎛️</span>
+                        <span>音色设置</span>
+                    </h3>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">选择音色</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="voice" value="girl" checked>
+                                <span>小女孩（甜美）</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="voice" value="boy">
+                                <span>小男孩（活泼）</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="voice" value="fairy">
+                                <span>魔法精灵</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">语速</label>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0.5" max="2" step="0.1" value="1" id="speedSlider" oninput="updateSpeed()">
+                            <span class="slider-value" id="speedValue">正常</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">语调</label>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0.5" max="2" step="0.1" value="1" id="pitchSlider" oninput="updatePitch()">
+                            <span class="slider-value" id="pitchValue">自然</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">音量</label>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0" max="100" step="5" value="80" id="volumeSlider" oninput="updateVolume()">
+                            <span class="slider-value" id="volumeValue">较高</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">情感</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="emotion" value="happy" checked>
+                                <span>开心</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="emotion" value="calm">
+                                <span>平静</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="emotion" value="excited">
+                                <span>兴奋</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 背景音乐 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>🎶</span>
+                        <span>背景音乐</span>
+                    </h3>
+                    
+                    <div class="music-options">
+                        <div class="music-item active" data-music="none">无背景音乐</div>
+                        <div class="music-item" data-music="happy">轻快欢乐</div>
+                        <div class="music-item" data-music="magic">神秘魔幻</div>
+                        <div class="music-item" data-music="warm">温馨治愈</div>
+                        <div class="music-item" data-music="adventure">冒险激昂</div>
+                        <div class="music-item" data-music="nature">自然森林</div>
+                        <div class="music-item" data-music="classical">古典优雅</div>
+                        <div class="music-item" data-music="custom">自定义上传</div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">背景音量</label>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0" max="100" step="5" value="20" id="bgVolumeSlider" oninput="updateBgVolume()">
+                            <span class="slider-value" id="bgVolumeValue">较低</span>
+                        </div>
+                    </div>
+
+                    <button class="tool-button secondary" onclick="previewBgMusic()" style="width: 100%;">试听背景音乐</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部动作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="saveSettings()">保存设置</button>
+            <button class="btn btn-primary" onclick="synthesizeAudio()">开始合成</button>
+            <button class="btn btn-secondary" onclick="batchProcess()">批量处理</button>
+        </div>
+    </div>
+
+    <script>
+        let currentVoice = 'girl';
+        let currentMusic = 'none';
+
+        // 更新文本信息
+        function updateTextInfo() {
+            const text = document.getElementById('textInput').value;
+            const charCount = text.length;
+            const estimatedTime = Math.ceil(charCount / 2); // 大概每秒2个字
+            
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('estimatedTime').textContent = estimatedTime;
+        }
+
+        // 音色选择
+        document.querySelectorAll('.voice-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const voice = this.dataset.voice;
+                selectVoice(voice);
+            });
+        });
+
+        function selectVoice(voice) {
+            document.querySelectorAll('.voice-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-voice="${voice}"]`).classList.add('active');
+            currentVoice = voice;
+            
+            // 更新单选按钮
+            document.querySelector(`input[name="voice"][value="${voice}"]`).checked = true;
+        }
+
+        function previewVoice(voice) {
+            alert(`试听 ${voice} 音色`);
+        }
+
+        // 背景音乐选择
+        document.querySelectorAll('.music-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.music-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                currentMusic = this.dataset.music;
+            });
+        });
+
+        // 滑块更新
+        function updateSpeed() {
+            const value = document.getElementById('speedSlider').value;
+            const labels = { '0.5': '很慢', '0.8': '较慢', '1.0': '正常', '1.2': '较快', '1.5': '很快', '2.0': '极快' };
+            document.getElementById('speedValue').textContent = labels[value] || '正常';
+        }
+
+        function updatePitch() {
+            const value = document.getElementById('pitchSlider').value;
+            const labels = { '0.5': '很低', '0.8': '较低', '1.0': '自然', '1.2': '较高', '1.5': '很高', '2.0': '极高' };
+            document.getElementById('pitchValue').textContent = labels[value] || '自然';
+        }
+
+        function updateVolume() {
+            const value = document.getElementById('volumeSlider').value;
+            const labels = { '0': '静音', '20': '很低', '40': '较低', '60': '正常', '80': '较高', '100': '最高' };
+            const label = Object.keys(labels).find(key => Math.abs(key - value) <= 10) || '正常';
+            document.getElementById('volumeValue').textContent = labels[label];
+        }
+
+        function updateBgVolume() {
+            const value = document.getElementById('bgVolumeSlider').value;
+            const labels = { '0': '静音', '20': '较低', '40': '正常', '60': '较高', '80': '很高', '100': '最高' };
+            const label = Object.keys(labels).find(key => Math.abs(key - value) <= 10) || '正常';
+            document.getElementById('bgVolumeValue').textContent = labels[label];
+        }
+
+        // 语音输入
+        function voiceInput() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.onresult = function(event) {
+                    const result = event.results[0][0].transcript;
+                    document.getElementById('textInput').value = result;
+                    updateTextInfo();
+                };
+                recognition.start();
+            } else {
+                alert('浏览器不支持语音输入');
+            }
+        }
+
+        // 导入文本
+        function importText() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('textInput').value = e.target.result;
+                        updateTextInfo();
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // AI润色文本
+        function aiEnhance() {
+            alert('AI正在润色文本...');
+        }
+
+        // 清空文本
+        function clearText() {
+            document.getElementById('textInput').value = '';
+            updateTextInfo();
+        }
+
+        // 合成音频
+        function synthesizeAudio() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('请先输入文本内容');
+                return;
+            }
+            
+            alert('开始合成音频，请稍候...');
+            // 模拟合成过程
+            setTimeout(() => {
+                alert('音频合成完成！');
+            }, 2000);
+        }
+
+        // 播放音频
+        function playAudio() {
+            alert('播放当前音频');
+        }
+
+        function playGeneratedAudio() {
+            alert('播放生成的音频');
+        }
+
+        function regenerateAudio() {
+            synthesizeAudio();
+        }
+
+        // 试听背景音乐
+        function previewBgMusic() {
+            alert(`试听背景音乐: ${currentMusic}`);
+        }
+
+        // 保存设置
+        function saveSettings() {
+            alert('设置已保存！');
+        }
+
+        // 批量处理
+        function batchProcess() {
+            alert('批量处理功能开发中...');
+        }
+
+        // 音频编辑
+        function audioEdit() {
+            alert('音频编辑功能开发中...');
+        }
+
+        // 分享音频
+        function shareAudio() {
+            alert('分享功能开发中...');
+        }
+
+        // 更多音色
+        function moreVoices() {
+            alert('更多音色功能开发中...');
+        }
+
+        // 自定义音色
+        function customVoice() {
+            alert('自定义音色功能开发中...');
+        }
+
+        // 初始化
+        updateTextInfo();
+    </script>
+</body>
+</html> 

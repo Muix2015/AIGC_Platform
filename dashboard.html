@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意动画创作星球 - 创作大厅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f1635 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        /* 星空背景 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* 流星效果 */
+        .shooting-star {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #00E5FF, transparent);
+            border-radius: 50%;
+            animation: shooting 8s infinite linear;
+        }
+
+        @keyframes shooting {
+            0% {
+                transform: translateX(-100px) translateY(-100px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px)) translateY(calc(100vh + 100px));
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00E5FF, #4FC3F7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            color: #4FC3F7;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-btn, .settings-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(79, 195, 247, 0.2);
+            border: 1px solid rgba(79, 195, 247, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .notification-btn:hover, .settings-btn:hover {
+            background: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00A8FF, #4FC3F7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 2px solid rgba(0, 229, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+            transform: scale(1.1);
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 中央创作区域 */
+        .creation-center {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .creation-title {
+            font-size: 32px;
+            color: #00E5FF;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 229, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(0, 229, 255, 0.8), 0 0 40px rgba(0, 229, 255, 0.3); }
+        }
+
+        .creation-button-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .creation-button {
+            display: inline-block;
+            padding: 30px 60px;
+            background: linear-gradient(135deg, #00A8FF, #00E5FF);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(0, 168, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .creation-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.6);
+        }
+
+        .creation-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .creation-button:hover::before {
+            left: 100%;
+        }
+
+        /* 呼吸光环效果 */
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%;
+            height: 150%;
+            border: 2px solid rgba(0, 229, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .creation-subtitle {
+            font-size: 18px;
+            color: #4FC3F7;
+            opacity: 0.9;
+        }
+
+        /* 内容网格布局 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        /* 我的作品区域 */
+        .my-works-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .my-works-section:hover {
+            border-color: rgba(0, 229, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #00E5FF;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            font-size: 24px;
+        }
+
+        .works-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .work-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .work-card:hover {
+            transform: translateY(-5px) rotateX(5deg);
+            box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3);
+            border-color: rgba(0, 229, 255, 0.5);
+        }
+
+        .work-thumbnail {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, #4FC3F7, #00A8FF);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .work-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .work-title {
+            font-size: 14px;
+            color: #4FC3F7;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .work-status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .view-all-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4FC3F7, #00E5FF);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .view-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4);
+        }
+
+        /* 学习中心区域 */
+        .learning-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .learning-section:hover {
+            border-color: rgba(0, 230, 118, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 230, 118, 0.2);
+        }
+
+        .learning-section .section-title {
+            color: #00E676;
+        }
+
+        .daily-tip {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tip-icon {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .tip-content {
+            font-size: 16px;
+            color: #4FC3F7;
+            line-height: 1.5;
+        }
+
+        .challenge-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .challenge-title {
+            color: #FFC107;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .challenge-content {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* 创作灵感推荐 */
+        .inspiration-section {
+            margin-bottom: 40px;
+        }
+
+        .inspiration-title {
+            text-align: center;
+            font-size: 28px;
+            color: #00E5FF;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+
+        .inspiration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .inspiration-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .inspiration-card:hover {
+            transform: translateY(-10px) rotateY(5deg);
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.3);
+            border-color: rgba(0, 229, 255, 0.6);
+        }
+
+        .inspiration-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(79, 195, 247, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .inspiration-card:hover::before {
+            opacity: 1;
+        }
+
+        .inspiration-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+
+        .inspiration-card-title {
+            font-size: 18px;
+            color: #00E5FF;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .inspiration-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* 免登录模式样式 */
+        .guest-banner {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .guest-banner h3 {
+            color: #FFC107;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .guest-banner p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .register-btn {
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        .guest-works .work-card {
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .guest-works .work-status::after {
+            content: ' (临时保存)';
+            color: #FFC107;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 15px 20px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .creation-title {
+                font-size: 24px;
+            }
+
+            .creation-button {
+                padding: 20px 40px;
+                font-size: 18px;
+            }
+
+            .inspiration-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .works-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-left .welcome-text {
+                display: none;
+            }
+        }
+
+        /* 粒子动画 */
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: #00E5FF;
+            border-radius: 50%;
+            animation: floatUp 8s infinite linear;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- 浮动粒子 -->
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="main-container">
+        <!-- 顶部导航栏 -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <div class="logo">🌟 创作星球</div>
+                <div class="welcome-text" id="welcomeText">欢迎回来，小创作家！</div>
+            </div>
+            <div class="nav-right">
+                <button class="notification-btn" title="消息通知">🔔</button>
+                <button class="settings-btn" title="设置">⚙️</button>
+                <div class="user-avatar" id="userAvatar" title="个人中心">🎨</div>
+            </div>
+        </nav>
+
+        <!-- 免登录模式横幅 -->
+        <div class="guest-banner" id="guestBanner" style="display: none;">
+            <h3>🎁 体验模式</h3>
+            <p>你正在使用免费体验模式，作品将临时保存7天</p>
+            <button class="register-btn" onclick="goToRegister()">注册保存作品</button>
+        </div>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 中央创作区域 -->
+            <section class="creation-center">
+                <h1 class="creation-title">🎬 今天想创作什么精彩故事？</h1>
+                <div class="creation-button-container">
+                    <div class="pulse-ring"></div>
+                    <a href="create-mode.html" class="creation-button">
+                        ✨ 开始新的创意动画之旅 🚀
+                    </a>
+                </div>
+                <p class="creation-subtitle">让我们一起创造精彩的故事！</p>
+            </section>
+
+            <!-- 内容网格 -->
+            <div class="content-grid">
+                <!-- 我的作品区域 -->
+                <section class="my-works-section" id="worksSection">
+                    <h2 class="section-title">
+                        <span class="section-icon">📚</span>
+                        我的作品
+                    </h2>
+                    <div class="works-grid" id="worksGrid">
+                        <div class="work-card" onclick="editWork('magic-forest')">
+                            <div class="work-thumbnail">🏰</div>
+                            <div class="work-title">魔法森林的秘密</div>
+                            <div class="work-status">制作中</div>
+                        </div>
+                        <div class="work-card" onclick="editWork('future-city')">
+                            <div class="work-thumbnail">🚀</div>
+                            <div class="work-title">未来城市冒险</div>
+                            <div class="work-status">已完成</div>
+                        </div>
+                        <div class="work-card" onclick="editWork('robot-friend')">
+                            <div class="work-thumbnail">🤖</div>
+                            <div class="work-title">机器人朋友</div>
+                            <div class="work-status">制作中</div>
+                        </div>
+                        <div class="work-card" onclick="createNewWork()">
+                            <div class="work-thumbnail">➕</div>
+                            <div class="work-title">创建新作品</div>
+                            <div class="work-status">开始创作</div>
+                        </div>
+                    </div>
+                    <button class="view-all-btn" onclick="goToWorkManagement()">查看全部作品</button>
+                </section>
+
+                <!-- 网络安全学习中心 -->
+                <section class="learning-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">🛡️</span>
+                        网络安全学习中心
+                    </h2>
+                    <div class="daily-tip">
+                        <div class="tip-icon">💡</div>
+                        <div class="tip-content">
+                            <strong>今日安全小贴士：</strong><br>
+                            设置强密码就像给你的创作世界建造一道坚固的城墙，保护你的精彩作品不被坏人偷走！
+                        </div>
+                    </div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">🏆 本周挑战</div>
+                        <div class="challenge-content">
+                            创作一个关于"网络英雄保护数据王国"的动画故事，学习如何在网络世界中保护自己！
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 创作灵感推荐 -->
+            <section class="inspiration-section">
+                <h2 class="inspiration-title">🌈 创作灵感推荐</h2>
+                <div class="inspiration-grid">
+                    <div class="inspiration-card" onclick="createWithTemplate('fairy-tale')">
+                        <span class="inspiration-icon">🏰</span>
+                        <h3 class="inspiration-card-title">童话故事</h3>
+                        <p class="inspiration-description">"公主与龙的友谊" - 在魔法森林中，一位勇敢的公主和善良的龙成为了最好的朋友</p>
+                    </div>
+                    <div class="inspiration-card" onclick="createWithTemplate('sci-fi')">
+                        <span class="inspiration-icon">🚀</span>
+                        <h3 class="inspiration-card-title">科幻冒险</h3>
+                        <p class="inspiration-description">"机器人总动员" - 在遥远的未来，智能机器人们踏上了拯救地球的伟大征程</p>
+                    </div>
+                    <div class="inspiration-card" onclick="createWithTemplate('mystery')">
+                        <span class="inspiration-icon">🔍</span>
+                        <h3 class="inspiration-card-title">悬疑推理</h3>
+                        <p class="inspiration-description">"消失的宝藏" - 古老城堡中隐藏着神秘的宝藏，小侦探们能找到线索吗？</p>
+                    </div>
+                    <div class="inspiration-card" onclick="createWithTemplate('adventure')">
+                        <span class="inspiration-icon">⚔️</span>
+                        <h3 class="inspiration-card-title">奇幻冒险</h3>
+                        <p class="inspiration-description">"魔法学院" - 年轻的魔法师们在神奇的学院中学习法术，迎接挑战</p>
+                    </div>
+                    <div class="inspiration-card" onclick="createWithTemplate('nature')">
+                        <span class="inspiration-icon">🌱</span>
+                        <h3 class="inspiration-card-title">环保教育</h3>
+                        <p class="inspiration-description">"森林守护者" - 小动物们团结起来，保护美丽的家园不被污染</p>
+                    </div>
+                    <div class="inspiration-card" onclick="createWithTemplate('security')">
+                        <span class="inspiration-icon">🛡️</span>
+                        <h3 class="inspiration-card-title">网络安全</h3>
+                        <p class="inspiration-description">"数码世界的守护神" - 勇敢的网络安全小卫士保护数字王国的和平</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            createShootingStars();
+            createFloatingParticles();
+            initializeUserMode();
+            animateElements();
+        });
+
+        // 星空背景生成
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const starCount = 200;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 4 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // 流星效果
+        function createShootingStars() {
+            const container = document.getElementById('starsContainer');
+            
+            setInterval(() => {
+                if (Math.random() < 0.3) {
+                    const shootingStar = document.createElement('div');
+                    shootingStar.className = 'shooting-star';
+                    shootingStar.style.top = Math.random() * 100 + '%';
+                    shootingStar.style.left = '-100px';
+                    shootingStar.style.width = Math.random() * 100 + 50 + 'px';
+                    container.appendChild(shootingStar);
+
+                    setTimeout(() => {
+                        if (shootingStar.parentNode) {
+                            shootingStar.parentNode.removeChild(shootingStar);
+                        }
+                    }, 8000);
+                }
+            }, 3000);
+        }
+
+        // 浮动粒子效果
+        function createFloatingParticles() {
+            const container = document.getElementById('particles');
+            
+            setInterval(() => {
+                if (container.children.length < 15) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.width = particle.style.height = Math.random() * 6 + 2 + 'px';
+                    particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                    particle.style.animationDelay = Math.random() * 2 + 's';
+                    container.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 8000);
+                }
+            }, 800);
+        }
+
+        // 初始化用户模式
+        function initializeUserMode() {
+            // 检查是否为免登录模式
+            const urlParams = new URLSearchParams(window.location.search);
+            const isGuest = urlParams.get('mode') === 'guest' || localStorage.getItem('userMode') === 'guest';
+            
+            if (isGuest) {
+                enableGuestMode();
+            } else {
+                enableNormalMode();
+            }
+        }
+
+        // 启用免登录模式
+        function enableGuestMode() {
+            document.getElementById('guestBanner').style.display = 'block';
+            document.getElementById('welcomeText').textContent = '欢迎体验创作星球！';
+            document.getElementById('userAvatar').textContent = '👤';
+            
+            // 修改作品区域样式
+            const worksSection = document.getElementById('worksSection');
+            worksSection.classList.add('guest-works');
+            
+            // 限制作品数量提示
+            const worksGrid = document.getElementById('worksGrid');
+            const guestNote = document.createElement('div');
+            guestNote.style.gridColumn = '1 / -1';
+            guestNote.style.textAlign = 'center';
+            guestNote.style.color = '#FFC107';
+            guestNote.style.fontSize = '14px';
+            guestNote.style.marginTop = '10px';
+            guestNote.innerHTML = '💡 免费模式最多可创建3个作品';
+            worksGrid.appendChild(guestNote);
+        }
+
+        // 启用正常模式
+        function enableNormalMode() {
+            document.getElementById('guestBanner').style.display = 'none';
+            document.getElementById('welcomeText').textContent = '欢迎回来，小创作家！';
+            document.getElementById('userAvatar').textContent = '🎨';
+        }
+
+        // 元素进入动画
+        function animateElements() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            // 为所有主要元素添加观察
+            document.querySelectorAll('.inspiration-card, .work-card, .my-works-section, .learning-section').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.6s ease';
+                observer.observe(el);
+            });
+        }
+
+        // 交互功能
+        function editWork(workId) {
+            alert(`正在打开作品：${workId}\n跳转到编辑界面...`);
+            // 这里可以跳转到具体的编辑页面
+        }
+
+        function createNewWork() {
+            window.location.href = 'create-mode.html';
+        }
+
+        function goToWorkManagement() {
+            window.location.href = 'work-management.html';
+        }
+
+        function createWithTemplate(template) {
+            alert(`选择了${template}模板\n正在跳转到创作页面...`);
+            window.location.href = `template-config.html?template=${template}`;
+        }
+
+        function goToRegister() {
+            window.location.href = 'login.html';
+        }
+
+        // 头像点击事件
+        document.getElementById('userAvatar').addEventListener('click', function() {
+            const menu = document.createElement('div');
+            menu.style.position = 'absolute';
+            menu.style.top = '60px';
+            menu.style.right = '40px';
+            menu.style.background = 'rgba(255, 255, 255, 0.1)';
+            menu.style.backdropFilter = 'blur(15px)';
+            menu.style.border = '1px solid rgba(79, 195, 247, 0.3)';
+            menu.style.borderRadius = '12px';
+            menu.style.padding = '15px';
+            menu.style.minWidth = '150px';
+            menu.style.zIndex = '1000';
+            menu.innerHTML = `
+                <div style="color: #4FC3F7; margin-bottom: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(79, 195, 247, 0.2)'" onmouseout="this.style.background='transparent'">👤 个人资料</div>
+                <div style="color: #4FC3F7; margin-bottom: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(79, 195, 247, 0.2)'" onmouseout="this.style.background='transparent'">📚 我的作品</div>
+                <div style="color: #4FC3F7; margin-bottom: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(79, 195, 247, 0.2)'" onmouseout="this.style.background='transparent'">⚙️ 设置</div>
+                <div style="color: #FF5252; cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 82, 82, 0.2)'" onmouseout="this.style.background='transparent'">🚪 退出登录</div>
+            `;
+            
+            document.body.appendChild(menu);
+            
+            // 点击外部关闭菜单
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 100);
+        });
+
+        // 通知按钮点击事件
+        document.querySelector('.notification-btn').addEventListener('click', function() {
+            alert('🔔 你有新的消息！\n\n• 系统消息：欢迎来到创作星球！\n• 创作提示：记得保存你的精彩作品\n• 安全提醒：设置强密码保护账户');
+        });
+
+        // 设置按钮点击事件
+        document.querySelector('.settings-btn').addEventListener('click', function() {
+            alert('⚙️ 设置功能开发中...\n即将支持：\n• 主题切换\n• 语言设置\n• 通知偏好\n• 隐私设置');
+        });
+
+        // 创作按钮悬停效果增强
+        document.querySelector('.creation-button').addEventListener('mouseenter', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 10);
+        });
+    </script>
+</body>
+</html> 

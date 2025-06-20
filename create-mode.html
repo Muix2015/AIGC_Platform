@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意动画创作星球 - 选择创作模式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f1635 100%);
+            min-height: 100vh;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+            color: white;
+        }
+
+        /* 星空背景 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* 传送门背景效果 */
+        .portal-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.1) 0%, rgba(79, 195, 247, 0.05) 30%, transparent 70%);
+            border-radius: 50%;
+            animation: portalPulse 8s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes portalPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+        }
+
+        /* 能量环 */
+        .energy-ring {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 500px;
+            border: 2px solid rgba(0, 229, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: rotate 20s linear infinite;
+            z-index: 1;
+        }
+
+        .energy-ring::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 50%;
+            animation: rotate 15s linear infinite reverse;
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(79, 195, 247, 0.2);
+            border: 1px solid rgba(79, 195, 247, 0.5);
+            border-radius: 25px;
+            padding: 10px 18px;
+            color: #4FC3F7;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+            transform: translateX(-5px);
+        }
+
+        .page-title {
+            font-size: 20px;
+            background: linear-gradient(135deg, #00E5FF, #4FC3F7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px 30px 20px;
+            position: relative;
+        }
+
+        /* 页面标题 */
+        .content-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .content-title h1 {
+            font-size: 32px;
+            color: #00E5FF;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(0, 229, 255, 0.6);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 30px rgba(0, 229, 255, 0.6); }
+            to { text-shadow: 0 0 40px rgba(0, 229, 255, 0.9), 0 0 60px rgba(0, 229, 255, 0.4); }
+        }
+
+        .content-title p {
+            font-size: 16px;
+            color: #4FC3F7;
+            opacity: 0.9;
+        }
+
+        /* 创作模式选择区域 */
+        .mode-selection {
+            display: flex;
+            gap: 60px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        /* 连接线 */
+        .connection-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00E5FF, transparent);
+            transform: translate(-50%, -50%);
+            animation: energyFlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes energyFlow {
+            0% { opacity: 0.3; transform: translate(-50%, -50%) scaleX(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scaleX(1.2); }
+        }
+
+        .connection-line::before {
+            content: '⚡';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00E5FF;
+            font-size: 16px;
+            animation: lightningPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes lightningPulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        /* 模式卡片 */
+        .mode-card {
+            width: 320px;
+            height: 380px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            z-index: 3;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-15px) rotateY(8deg) scale(1.03);
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        /* 模板创作卡片 */
+        .template-card {
+            border: 2px solid rgba(0, 168, 255, 0.4);
+            box-shadow: 0 15px 40px rgba(0, 168, 255, 0.2);
+        }
+
+        .template-card .card-inner {
+            background: linear-gradient(135deg, rgba(0, 168, 255, 0.1), rgba(79, 195, 247, 0.1));
+        }
+
+        .template-card:hover {
+            border-color: rgba(0, 168, 255, 0.8);
+            box-shadow: 0 25px 60px rgba(0, 168, 255, 0.4);
+        }
+
+        .template-card:hover .card-inner {
+            background: linear-gradient(135deg, rgba(0, 168, 255, 0.2), rgba(79, 195, 247, 0.2));
+        }
+
+        /* 自由创作卡片 */
+        .free-card {
+            border: 2px solid rgba(0, 229, 255, 0.4);
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.2);
+        }
+
+        .free-card .card-inner {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(124, 77, 255, 0.1));
+        }
+
+        .free-card:hover {
+            border-color: rgba(0, 229, 255, 0.8);
+            box-shadow: 0 25px 60px rgba(0, 229, 255, 0.4);
+        }
+
+        .free-card:hover .card-inner {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(124, 77, 255, 0.2));
+        }
+
+        /* 卡片图标 */
+        .card-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            animation: iconFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px currentColor);
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        .template-card .card-icon {
+            background: linear-gradient(135deg, #00A8FF, #4FC3F7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .free-card .card-icon {
+            background: linear-gradient(135deg, #00E5FF, #7C4DFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 卡片标题 */
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .template-card .card-title {
+            color: #00A8FF;
+        }
+
+        .free-card .card-title {
+            color: #00E5FF;
+        }
+
+        /* 卡片描述 */
+        .card-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            margin-bottom: 18px;
+            flex: 1;
+        }
+
+        /* 创作模块展示 */
+        .creation-modules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .template-card .module-item {
+            background: rgba(0, 168, 255, 0.2);
+            border-color: rgba(0, 168, 255, 0.5);
+            color: #4FC3F7;
+        }
+
+        .free-card .module-item {
+            background: rgba(0, 229, 255, 0.2);
+            border-color: rgba(0, 229, 255, 0.5);
+            color: #00E5FF;
+        }
+
+        /* 选择按钮 */
+        .select-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 5;
+        }
+
+        .template-card .select-btn {
+            background: linear-gradient(135deg, #00A8FF, #4FC3F7);
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 168, 255, 0.3);
+        }
+
+        .free-card .select-btn {
+            background: linear-gradient(135deg, #00E5FF, #7C4DFF);
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 229, 255, 0.3);
+        }
+
+        .select-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 229, 255, 0.5);
+        }
+
+        .select-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .select-btn:hover::before {
+            left: 100%;
+        }
+
+        /* 底部说明区域 */
+        .bottom-info {
+            max-width: 700px;
+            text-align: center;
+        }
+
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .comparison-title {
+            font-size: 18px;
+            color: #00E5FF;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .comparison-item h4 {
+            color: #4FC3F7;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .comparison-item p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .tips {
+            color: #4FC3F7;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* 粒子效果 */
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: #00E5FF;
+            border-radius: 50%;
+            animation: particleFloat 10s infinite linear;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .mode-selection {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .connection-line {
+                width: 2px;
+                height: 40px;
+                background: linear-gradient(180deg, transparent, #00E5FF, transparent);
+                transform: translate(-50%, -50%) rotate(90deg);
+            }
+
+            .mode-card {
+                width: 300px;
+                height: 360px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 12px 15px;
+            }
+
+            .main-content {
+                padding: 15px 10px 20px 10px;
+            }
+
+            .content-title h1 {
+                font-size: 26px;
+            }
+
+            .mode-card {
+                width: 280px;
+                height: 350px;
+            }
+
+            .card-inner {
+                padding: 20px 15px;
+            }
+
+            .card-icon {
+                font-size: 50px;
+            }
+
+            .card-title {
+                font-size: 20px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .comparison-table {
+                padding: 15px;
+            }
+        }
+
+        /* 鼠标交互效果 */
+        .mode-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border-radius: 20px;
+            z-index: 1;
+        }
+
+        .mode-card:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- 传送门背景 -->
+    <div class="portal-bg"></div>
+    <div class="energy-ring"></div>
+
+    <!-- 浮动粒子 -->
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="main-container">
+        <!-- 顶部导航 -->
+        <nav class="top-nav">
+            <a href="dashboard.html" class="back-btn">
+                <span>⬅️</span>
+                <span>返回创作大厅</span>
+            </a>
+            <div class="page-title">🌟 创作星球 - 模式选择</div>
+            <div></div>
+        </nav>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 页面标题 -->
+            <div class="content-title">
+                <h1>🎨 选择你的创作维度</h1>
+                <p>每一种创作方式都是通往无限创意宇宙的传送门</p>
+            </div>
+
+            <!-- 创作模式选择 -->
+            <div class="mode-selection">
+                <!-- 模板创作卡片 -->
+                <div class="mode-card template-card" onclick="selectTemplateMode()">
+                    <div class="card-inner">
+                        <div class="card-icon">🎭</div>
+                        <h3 class="card-title">模板创作</h3>
+                        <p class="card-description">
+                            基于精心设计的故事模板，通过简单配置快速创作精彩动画。适合新手创作者和快速原型制作。
+                        </p>
+                        <div class="creation-modules">
+                            <div class="module-item">
+                                <span>✨</span>
+                                <span>智能辅助</span>
+                            </div>
+                            <div class="module-item">
+                                <span>⚡</span>
+                                <span>快速创作</span>
+                            </div>
+                            <div class="module-item">
+                                <span>🎯</span>
+                                <span>简单易用</span>
+                            </div>
+                            <div class="module-item">
+                                <span>🏰</span>
+                                <span>多种主题</span>
+                            </div>
+                        </div>
+                        <button class="select-btn">进入模板世界</button>
+                    </div>
+                </div>
+
+                <!-- 连接线 -->
+                <div class="connection-line"></div>
+
+                <!-- 自由创作卡片 -->
+                <div class="mode-card free-card" onclick="selectFreeMode()">
+                    <div class="card-inner">
+                        <div class="card-icon">🌟</div>
+                        <h3 class="card-title">自由创作</h3>
+                        <p class="card-description">
+                            完全自主的创意构思，从零开始打造独一无二的故事世界。支持多种创作形式，释放无限想象力。
+                        </p>
+                        <div class="creation-modules">
+                            <div class="module-item">
+                                <span>📝</span>
+                                <span>剧本创作</span>
+                            </div>
+                            <div class="module-item">
+                                <span>🎨</span>
+                                <span>图片生成</span>
+                            </div>
+                            <div class="module-item">
+                                <span>🎬</span>
+                                <span>视频制作</span>
+                            </div>
+                            <div class="module-item">
+                                <span>🎵</span>
+                                <span>音频合成</span>
+                            </div>
+                        </div>
+                        <button class="select-btn">开启创意之旅</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部说明 -->
+            <div class="bottom-info">
+                <div class="comparison-table">
+                    <h3 class="comparison-title">💡 创作模式对比</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-item">
+                            <h4>🎭 模板创作</h4>
+                            <p>• 预设故事框架和角色<br>• 引导式创作流程<br>• 30分钟内完成作品<br>• 适合初学者和教学</p>
+                        </div>
+                        <div class="comparison-item">
+                            <h4>🌟 自由创作</h4>
+                            <p>• 完全原创的故事构思<br>• 支持剧本/图片/视频/音频<br>• 更长的创作时间<br>• 适合有经验的创作者</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="tips">💫 小贴士：不确定选择哪种模式？建议先从模板创作开始，熟悉流程后再尝试自由创作！</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            createFloatingParticles();
+            initMouseInteraction();
+            animateElements();
+        });
+
+        // 星空背景生成
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const starCount = 100;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // 浮动粒子效果
+        function createFloatingParticles() {
+            const container = document.getElementById('particles');
+            
+            setInterval(() => {
+                if (container.children.length < 8) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+                    particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                    particle.style.animationDelay = Math.random() * 2 + 's';
+                    container.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 10000);
+                }
+            }, 1500);
+        }
+
+        // 鼠标交互效果
+        function initMouseInteraction() {
+            const cards = document.querySelectorAll('.mode-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    
+                    this.style.setProperty('--mouse-x', x + '%');
+                    this.style.setProperty('--mouse-y', y + '%');
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.setProperty('--mouse-x', '50%');
+                    this.style.setProperty('--mouse-y', '50%');
+                });
+            });
+        }
+
+        // 元素进入动画
+        function animateElements() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0) scale(1)';
+                    }
+                });
+            });
+
+            // 为所有主要元素添加观察
+            document.querySelectorAll('.mode-card, .comparison-table').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px) scale(0.95)';
+                el.style.transition = 'all 0.8s ease';
+                observer.observe(el);
+            });
+        }
+
+        // 模板创作模式选择
+        function selectTemplateMode() {
+            // 创建传送门动画效果
+            createPortalEffect('template');
+            
+            // 播放选择音效（模拟）
+            playSelectSound();
+            
+            setTimeout(() => {
+                alert('🎭 进入模板创作模式！\n\n你将通过简单的配置选择：\n• 故事类型（童话、科幻、悬疑等）\n• 主角设定\n• 场景风格\n• 艺术风格\n\n让AI帮你快速生成精彩的动画故事！');
+                
+                // 跳转到模板配置页面
+                window.location.href = 'template-config.html';
+            }, 800);
+        }
+
+        // 自由创作模式选择
+        function selectFreeMode() {
+            // 创建传送门动画效果
+            createPortalEffect('free');
+            
+            // 播放选择音效（模拟）
+            playSelectSound();
+            
+            setTimeout(() => {
+                alert('🌟 进入自由创作模式！\n\n你可以选择不同的创作类型：\n📝 剧本创作 - 编写完整故事脚本\n🎨 图片生成 - AI绘制精美插画\n🎬 视频制作 - 制作动画短片\n🎵 音频合成 - 创作背景音乐和音效\n\n准备好释放你的无限创意了吗？');
+                
+                // 跳转到自由创作页面
+                window.location.href = 'free-creation.html';
+            }, 800);
+        }
+
+        // 创建传送门选择效果
+        function createPortalEffect(mode) {
+            const selectedCard = document.querySelector(mode === 'template' ? '.template-card' : '.free-card');
+            
+            // 卡片发光效果
+            selectedCard.style.boxShadow = mode === 'template' 
+                ? '0 0 50px rgba(0, 168, 255, 0.8), 0 0 100px rgba(0, 168, 255, 0.4)'
+                : '0 0 50px rgba(0, 229, 255, 0.8), 0 0 100px rgba(0, 229, 255, 0.4)';
+            
+            selectedCard.style.transform = 'translateY(-20px) scale(1.08)';
+            
+            // 创建能量波纹
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.top = '50%';
+            ripple.style.left = '50%';
+            ripple.style.width = '0';
+            ripple.style.height = '0';
+            ripple.style.background = mode === 'template' 
+                ? 'radial-gradient(circle, rgba(0, 168, 255, 0.6) 0%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(0, 229, 255, 0.6) 0%, transparent 70%)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.zIndex = '10';
+            
+            selectedCard.appendChild(ripple);
+            
+            // 波纹扩散动画
+            let size = 0;
+            const expandRipple = () => {
+                size += 15;
+                ripple.style.width = size + 'px';
+                ripple.style.height = size + 'px';
+                ripple.style.opacity = 1 - (size / 300);
+                
+                if (size < 300) {
+                    requestAnimationFrame(expandRipple);
+                } else {
+                    ripple.remove();
+                }
+            };
+            
+            requestAnimationFrame(expandRipple);
+        }
+
+        // 播放选择音效（模拟）
+        function playSelectSound() {
+            // 这里可以添加实际的音频播放
+            console.log('🔊 播放选择音效');
+        }
+
+        // 卡片悬停增强效果
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                // 增强3D效果
+                this.style.transform = 'translateY(-15px) rotateY(8deg) scale(1.03)';
+                
+                // 增强光效
+                const isTemplate = this.classList.contains('template-card');
+                this.style.boxShadow = isTemplate
+                    ? '0 25px 60px rgba(0, 168, 255, 0.4), 0 0 30px rgba(0, 168, 255, 0.3)'
+                    : '0 25px 60px rgba(0, 229, 255, 0.4), 0 0 30px rgba(0, 229, 255, 0.3)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                // 恢复原始状态
+                this.style.transform = 'translateY(0) rotateY(0deg) scale(1)';
+                
+                const isTemplate = this.classList.contains('template-card');
+                this.style.boxShadow = isTemplate
+                    ? '0 15px 40px rgba(0, 168, 255, 0.2)'
+                    : '0 15px 40px rgba(0, 229, 255, 0.2)';
+            });
+        });
+
+        // 页面加载完成后的入场动画
+        window.addEventListener('load', function() {
+            // 卡片依次出现
+            const cards = document.querySelectorAll('.mode-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, index * 300 + 500);
+            });
+        });
+    </script>
+</body>
+</html> 

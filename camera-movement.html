@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头运动设计 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 16px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FFC107;
+            text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+        }
+
+        .progress-bar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, #FFC107, #00A8FF);
+            border-radius: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        /* 流程步骤指示器 */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #90A4AE;
+        }
+
+        .progress-step {
+            position: relative;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.completed {
+            background: rgba(0, 168, 255, 0.2);
+            color: #00A8FF;
+        }
+
+        .progress-step.current {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+            font-weight: 600;
+        }
+
+        .step-info {
+            font-size: 14px;
+            color: #90A4AE;
+        }
+
+        .ai-director {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .ai-director:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        .director-text {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* 主工作区布局 */
+        .workspace {
+            display: grid;
+            grid-template-rows: 300px 1fr;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        /* 预览区域 */
+        .preview-section {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .preview-viewport {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .viewport-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .viewport-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFC107;
+        }
+
+        .viewport-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #FFC107;
+        }
+
+        .camera-viewport {
+            width: 100%;
+            height: 200px;
+            background: #1a1a1a;
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-frame {
+            width: 90%;
+            height: 90%;
+            border: 1px dashed rgba(255, 193, 7, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .camera-path {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px dashed rgba(0, 168, 255, 0.5);
+            border-radius: 8px;
+            animation: cameraMove 3s infinite;
+        }
+
+        @keyframes cameraMove {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .scene-preview {
+            font-size: 48px;
+            opacity: 0.7;
+        }
+
+        /* 运动效果面板 */
+        .movement-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #FFC107;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .movement-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .movement-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .movement-btn:hover {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #FFC107;
+            transform: scale(1.02);
+        }
+
+        .movement-btn.active {
+            background: rgba(255, 193, 7, 0.3);
+            border-color: #FFC107;
+        }
+
+        .movement-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* 编辑区域 */
+        .editing-section {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 20px;
+        }
+
+        /* 左侧运动库 */
+        .motion-library {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .library-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00A8FF;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .motion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .motion-item {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .motion-item:hover {
+            background: rgba(0, 168, 255, 0.2);
+            border-color: #00A8FF;
+        }
+
+        .motion-item.active {
+            background: rgba(0, 168, 255, 0.3);
+            border-color: #00A8FF;
+        }
+
+        /* 中央时间轴 */
+        .timeline-area {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .timeline-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFC107;
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .timeline-container {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .time-markers {
+            display: flex;
+            justify-content: space-between;
+            height: 100%;
+            align-items: center;
+            padding: 0 8px;
+        }
+
+        .time-marker {
+            font-size: 10px;
+            color: #90A4AE;
+        }
+
+        .timeline-tracks {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 8px;
+            min-height: 40px;
+            position: relative;
+        }
+
+        .track-label {
+            font-size: 12px;
+            color: #90A4AE;
+            margin-bottom: 4px;
+        }
+
+        .keyframe {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #FFC107;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .keyframe:hover {
+            transform: translateY(-50%) scale(1.2);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .keyframe.start {
+            left: 10%;
+        }
+
+        .keyframe.end {
+            left: 80%;
+        }
+
+        /* 右侧参数面板 */
+        .params-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .param-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .param-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .param-control {
+            margin-bottom: 12px;
+        }
+
+        .param-label {
+            font-size: 12px;
+            color: #90A4AE;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .param-slider {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            appearance: none;
+        }
+
+        .param-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #FFC107;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .security-highlight {
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.1), rgba(0, 230, 118, 0.05));
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        /* 底部操作栏 */
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 16px;
+            z-index: 100;
+        }
+
+        .action-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .scene-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .scene-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .scene-btn.active {
+            background: rgba(255, 193, 7, 0.3);
+            border-color: #FFC107;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary, .btn-primary {
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            color: #1a1a2e;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-secondary:hover, .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .editing-section {
+                grid-template-columns: 280px 1fr 260px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-rows: auto auto;
+                height: auto;
+            }
+
+            .preview-section {
+                grid-template-columns: 1fr;
+            }
+
+            .editing-section {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+
+            .motion-library, .params-panel {
+                display: flex;
+                gap: 16px;
+                overflow-x: auto;
+            }
+
+            .library-section, .param-card {
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .action-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .action-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #FFC107;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="logo">🎬 AI导演工作台</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-steps">
+                <span class="progress-step completed">故事</span>
+                <span class="progress-step completed">剧本</span>
+                <span class="progress-step completed">关键帧</span>
+                <span class="progress-step current">镜头</span>
+                <span class="progress-step">合成</span>
+                <span class="progress-step">配音</span>
+                <span class="progress-step">预览</span>
+                <span class="progress-step">发布</span>
+            </div>
+            <div class="step-info">步骤 4/8: 镜头运动设计</div>
+            <div class="ai-director" onclick="showDirectorTip()">
+                <span>🎭</span>
+                <span class="director-text">AI导演助手</span>
+            </div>
+        </header>
+
+        <!-- 主工作区 -->
+        <main class="workspace">
+            <!-- 预览区域 -->
+            <section class="preview-section">
+                <div class="preview-viewport">
+                    <div class="viewport-header">
+                        <h2 class="viewport-title">🎥 镜头运动预览</h2>
+                        <div class="viewport-controls">
+                            <button class="control-btn" onclick="playPreview()">▶️ 播放</button>
+                            <button class="control-btn" onclick="resetCamera()">🔄 重置</button>
+                        </div>
+                    </div>
+                    <div class="camera-viewport" id="cameraViewport">
+                        <div class="camera-frame">
+                            <div class="camera-path"></div>
+                            <div class="scene-preview">🏠</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="movement-panel">
+                    <h3 class="panel-title">🎯 快速运动效果</h3>
+                    <div class="movement-grid">
+                        <button class="movement-btn active" onclick="selectMovement('push')">
+                            <span class="movement-icon">📹</span>
+                            推进
+                        </button>
+                        <button class="movement-btn" onclick="selectMovement('pull')">
+                            <span class="movement-icon">📸</span>
+                            拉远
+                        </button>
+                        <button class="movement-btn" onclick="selectMovement('pan')">
+                            <span class="movement-icon">↔️</span>
+                            摇摆
+                        </button>
+                        <button class="movement-btn" onclick="selectMovement('tilt')">
+                            <span class="movement-icon">↕️</span>
+                            俯仰
+                        </button>
+                        <button class="movement-btn" onclick="selectMovement('orbit')">
+                            <span class="movement-icon">🔄</span>
+                            环绕
+                        </button>
+                        <button class="movement-btn" onclick="selectMovement('track')">
+                            <span class="movement-icon">🎯</span>
+                            跟踪
+                        </button>
+                    </div>
+                    <button class="btn-primary" onclick="applyMovement()" style="width: 100%; margin-top: 16px;">
+                        ✨ 应用运动效果
+                    </button>
+                </div>
+            </section>
+
+            <!-- 编辑区域 -->
+            <section class="editing-section">
+                <!-- 左侧运动库 -->
+                <aside class="motion-library">
+                    <div class="library-section">
+                        <h3 class="section-header">🎬 基础运动</h3>
+                        <div class="motion-list">
+                            <div class="motion-item active" onclick="selectMotion(this, 'push-in')">
+                                📹 推进镜头
+                            </div>
+                            <div class="motion-item" onclick="selectMotion(this, 'pull-out')">
+                                📸 拉远镜头
+                            </div>
+                            <div class="motion-item" onclick="selectMotion(this, 'pan-left')">
+                                ← 左摇
+                            </div>
+                            <div class="motion-item" onclick="selectMotion(this, 'pan-right')">
+                                → 右摇
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="library-section">
+                        <h3 class="section-header">🎪 创意运动</h3>
+                        <div class="motion-list">
+                            <div class="motion-item" onclick="selectMotion(this, 'orbit')">
+                                🔄 环绕运动
+                            </div>
+                            <div class="motion-item" onclick="selectMotion(this, 'spiral')">
+                                🌀 螺旋运动
+                            </div>
+                            <div class="motion-item" onclick="selectMotion(this, 'shake')">
+                                📳 镜头震动
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="library-section">
+                        <h3 class="section-header">🛡️ 安全教育特效</h3>
+                        <div class="motion-list">
+                            <div class="motion-item" onclick="selectMotion(this, 'security-zoom')">
+                                🔍 重点突出
+                            </div>
+                            <div class="motion-item" onclick="selectMotion(this, 'warning-shake')">
+                                ⚠️ 警示震动
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- 中央时间轴 -->
+                <div class="timeline-area">
+                    <div class="timeline-header">
+                        <h2 class="timeline-title">⏱️ 运动时间轴</h2>
+                        <div class="timeline-controls">
+                            <button class="control-btn" onclick="addKeyframe()">➕ 关键帧</button>
+                            <button class="control-btn" onclick="deleteKeyframe()">🗑️ 删除</button>
+                        </div>
+                    </div>
+                    <div class="timeline-container">
+                        <div class="timeline-ruler">
+                            <div class="time-markers">
+                                <span class="time-marker">0s</span>
+                                <span class="time-marker">1s</span>
+                                <span class="time-marker">2s</span>
+                                <span class="time-marker">3s</span>
+                                <span class="time-marker">4s</span>
+                            </div>
+                        </div>
+                        <div class="timeline-tracks">
+                            <div class="timeline-track">
+                                <div class="track-label">镜头位置</div>
+                                <div class="keyframe start" draggable="true"></div>
+                                <div class="keyframe end" draggable="true"></div>
+                            </div>
+                            <div class="timeline-track">
+                                <div class="track-label">镜头旋转</div>
+                                <div class="keyframe start" draggable="true"></div>
+                                <div class="keyframe end" draggable="true"></div>
+                            </div>
+                            <div class="timeline-track">
+                                <div class="track-label">镜头缩放</div>
+                                <div class="keyframe start" draggable="true"></div>
+                                <div class="keyframe end" draggable="true"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧参数面板 -->
+                <aside class="params-panel">
+                    <div class="param-card">
+                        <h3 class="param-title">⚙️ 运动参数</h3>
+                        <div class="param-control">
+                            <div class="param-label">
+                                <span>速度</span>
+                                <span>中等</span>
+                            </div>
+                            <input type="range" class="param-slider" min="1" max="10" value="5">
+                        </div>
+                        <div class="param-control">
+                            <div class="param-label">
+                                <span>平滑度</span>
+                                <span>自然</span>
+                            </div>
+                            <input type="range" class="param-slider" min="1" max="10" value="7">
+                        </div>
+                    </div>
+
+                    <div class="param-card">
+                        <h3 class="param-title">🎨 视觉效果</h3>
+                        <div class="param-control">
+                            <div class="param-label">
+                                <span>景深</span>
+                                <span>浅景深</span>
+                            </div>
+                            <input type="range" class="param-slider" min="1" max="10" value="6">
+                        </div>
+                        <div class="param-control">
+                            <div class="param-label">
+                                <span>动态模糊</span>
+                                <span>轻微</span>
+                            </div>
+                            <input type="range" class="param-slider" min="1" max="10" value="3">
+                        </div>
+                    </div>
+
+                    <div class="param-card security-highlight">
+                        <h3 class="param-title">🛡️ 安全教育</h3>
+                        <div style="font-size: 12px; line-height: 1.4; color: #ffffff;">
+                            当前镜头运动将突出网络安全关键信息，通过视觉引导加强教育效果。
+                        </div>
+                    </div>
+
+                    <div class="param-card">
+                        <h3 class="param-title">🔀 转场效果</h3>
+                        <div class="motion-list">
+                            <div class="motion-item" onclick="selectTransition('fade')">
+                                🌅 淡入淡出
+                            </div>
+                            <div class="motion-item" onclick="selectTransition('slide')">
+                                📱 滑动切换
+                            </div>
+                            <div class="motion-item" onclick="selectTransition('zoom')">
+                                🔍 缩放转场
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+        </main>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-actions">
+        <div class="action-container">
+            <div class="scene-nav">
+                <button class="scene-btn active" onclick="selectScene(1)">场景 1</button>
+                <button class="scene-btn" onclick="selectScene(2)">场景 2</button>
+                <button class="scene-btn" onclick="selectScene(3)">场景 3</button>
+                <button class="scene-btn" onclick="selectScene(4)">场景 4</button>
+                <button class="scene-btn" onclick="selectScene(5)">场景 5</button>
+                <button class="scene-btn" onclick="selectScene(6)">场景 6</button>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-secondary" onclick="goBack()">← 修改关键帧</button>
+                <button class="btn-secondary" onclick="saveProgress()">💾 保存进度</button>
+                <button class="btn-primary" onclick="nextStep()">
+                    完成镜头设计 →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMovement = 'push';
+        let currentScene = 1;
+        let selectedMotion = 'push-in';
+
+        // 选择运动类型
+        function selectMovement(type) {
+            const buttons = document.querySelectorAll('.movement-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            currentMovement = type;
+            
+            updateCameraPreview(type);
+            showDirectorMessage(`已选择${getMovementName(type)}运动！`);
+        }
+
+        function getMovementName(type) {
+            const names = {
+                'push': '推进',
+                'pull': '拉远',
+                'pan': '摇摆',
+                'tilt': '俯仰',
+                'orbit': '环绕',
+                'track': '跟踪'
+            };
+            return names[type] || type;
+        }
+
+        // 更新镜头预览
+        function updateCameraPreview(type) {
+            const cameraPath = document.querySelector('.camera-path');
+            const animations = {
+                'push': 'cameraMove 2s infinite',
+                'pull': 'cameraPull 2s infinite',
+                'pan': 'cameraPan 3s infinite',
+                'tilt': 'cameraTilt 2s infinite',
+                'orbit': 'cameraOrbit 4s infinite',
+                'track': 'cameraTrack 3s infinite'
+            };
+            
+            cameraPath.style.animation = animations[type] || animations['push'];
+        }
+
+        // 播放预览
+        function playPreview() {
+            const viewport = document.getElementById('cameraViewport');
+            viewport.style.transform = 'scale(1.05)';
+            viewport.style.transition = 'transform 0.3s ease';
+            
+            setTimeout(() => {
+                viewport.style.transform = 'scale(1)';
+            }, 300);
+            
+            showDirectorMessage('正在播放镜头运动预览！');
+        }
+
+        // 重置镜头
+        function resetCamera() {
+            const cameraPath = document.querySelector('.camera-path');
+            cameraPath.style.animation = 'none';
+            setTimeout(() => {
+                cameraPath.style.animation = 'cameraMove 3s infinite';
+            }, 100);
+            
+            showDirectorMessage('镜头已重置到初始位置！');
+        }
+
+        // 选择运动项
+        function selectMotion(element, motionType) {
+            const items = document.querySelectorAll('.motion-item');
+            items.forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            selectedMotion = motionType;
+            
+            showDirectorMessage(`已选择${element.textContent.trim()}！`);
+        }
+
+        // 应用运动效果
+        function applyMovement() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.innerHTML = '<div class="loading"></div> 应用中...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '✅ 已应用';
+                showDirectorMessage('镜头运动效果已应用到当前场景！');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        // 添加关键帧
+        function addKeyframe() {
+            showDirectorMessage('在时间轴上添加了新的关键帧！');
+        }
+
+        // 删除关键帧
+        function deleteKeyframe() {
+            showDirectorMessage('已删除选中的关键帧！');
+        }
+
+        // 选择转场效果
+        function selectTransition(type) {
+            const transitions = {
+                'fade': '淡入淡出',
+                'slide': '滑动切换',
+                'zoom': '缩放转场'
+            };
+            showDirectorMessage(`已选择${transitions[type]}转场效果！`);
+        }
+
+        // 选择场景
+        function selectScene(sceneNum) {
+            const buttons = document.querySelectorAll('.scene-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            currentScene = sceneNum;
+            
+            // 更新场景预览
+            const scenePreview = document.querySelector('.scene-preview');
+            const sceneIcons = ['🏠', '💻', '🤖', '🌐', '⚡', '🛡️'];
+            scenePreview.textContent = sceneIcons[sceneNum - 1] || '🎬';
+            
+            showDirectorMessage(`已切换到场景${sceneNum}！`);
+        }
+
+        // 显示AI导演提示
+        function showDirectorTip() {
+            const tips = [
+                '🎬 镜头运动是电影语言的重要组成部分！',
+                '💡 推进镜头可以增强紧张感和代入感！',
+                '🎯 环绕运动适合展示场景全貌！',
+                '⚡ 记住为网络安全场景添加特殊视觉效果！'
+            ];
+            
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            alert(randomTip);
+        }
+
+        // 显示导演消息
+        function showDirectorMessage(message) {
+            console.log('AI导演:', message);
+        }
+
+        // 保存进度
+        function saveProgress() {
+            const btn = document.querySelector('.btn-secondary[onclick="saveProgress()"]');
+            const originalText = btn.textContent;
+            btn.innerHTML = '<div class="loading"></div> 保存中...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '✅ 已保存';
+                showDirectorMessage('镜头运动设计已保存！');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        // 返回上一步
+        function goBack() {
+            if (confirm('确定要返回修改关键帧吗？当前的镜头运动设计将会保存。')) {
+                window.history.back();
+            }
+        }
+
+        // 下一步
+        function nextStep() {
+            showDirectorMessage('镜头运动设计完成！接下来将进入AI视频合成阶段。');
+            
+            setTimeout(() => {
+                window.location.href = 'video-synthesis.html';
+            }, 1000);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化第一个场景
+            selectScene(1);
+            
+            // 如果有保存的关键帧数据
+            const savedKeyframes = localStorage.getItem('keyframeData');
+            if (savedKeyframes) {
+                showDirectorMessage('基于你的关键帧设计，我将创建流畅的镜头运动！');
+            }
+            
+            // 添加拖拽功能到关键帧
+            const keyframes = document.querySelectorAll('.keyframe');
+            keyframes.forEach(keyframe => {
+                keyframe.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', '');
+                });
+                
+                keyframe.addEventListener('dragend', function(e) {
+                    showDirectorMessage('关键帧位置已调整！');
+                });
+            });
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        saveProgress();
+                        break;
+                    case ' ':
+                        event.preventDefault();
+                        playPreview();
+                        break;
+                }
+            }
+            
+            switch(event.key) {
+                case 'ArrowLeft':
+                    if (currentScene > 1) {
+                        event.preventDefault();
+                        selectScene(currentScene - 1);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (currentScene < 6) {
+                        event.preventDefault();
+                        selectScene(currentScene + 1);
+                    }
+                    break;
+            }
+        });
+    </script>
+
+    <style>
+        /* 添加更多镜头运动动画 */
+        @keyframes cameraPull {
+            0% { transform: scale(1.2) rotate(0deg); }
+            50% { transform: scale(0.8) rotate(-1deg); }
+            100% { transform: scale(1.2) rotate(0deg); }
+        }
+
+        @keyframes cameraPan {
+            0% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(10px) rotate(1deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+
+        @keyframes cameraTilt {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        @keyframes cameraOrbit {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(0.9); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes cameraTrack {
+            0% { transform: translateX(-20px) scale(1); }
+            50% { transform: translateX(20px) scale(1.1); }
+            100% { transform: translateX(-20px) scale(1); }
+        }
+    </style>
+</body>
+</html> 

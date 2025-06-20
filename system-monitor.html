@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统监控 - AI创意动画管理后台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        /* 顶部导航栏 */
+        .top-header {
+            height: 64px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .refresh-btn {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #40a9ff;
+        }
+
+        .notification-btn, .user-menu {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .notification-btn:hover, .user-menu:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 侧边导航栏 */
+        .sidebar {
+            width: 240px;
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 64px;
+            border-right: 1px solid #e8e8e8;
+            overflow-y: auto;
+        }
+
+        .nav-menu {
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #1890ff;
+        }
+
+        .nav-icon {
+            width: 16px;
+            margin-right: 12px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: #8c8c8c;
+            font-size: 14px;
+        }
+
+        /* 状态概览 */
+        .status-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .status-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1890ff;
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 20px;
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .status-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #262626;
+        }
+
+        .status-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1890ff;
+        }
+
+        .status-desc {
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+
+        .status-trend {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .trend-up {
+            color: #52c41a;
+        }
+
+        .trend-down {
+            color: #ff4d4f;
+        }
+
+        /* 监控图表区域 */
+        .monitor-charts {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1890ff;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-btn {
+            background: #f5f5f5;
+            color: #595959;
+            border: 1px solid #d9d9d9;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chart-btn.active,
+        .chart-btn:hover {
+            background: #1890ff;
+            color: #ffffff;
+            border-color: #1890ff;
+        }
+
+        .chart-canvas {
+            height: 300px;
+            background: #fafafa;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        /* 服务状态面板 */
+        .service-status {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-status::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1890ff;
+        }
+
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .service-item:last-child {
+            border-bottom: none;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .service-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .indicator-normal {
+            background: #52c41a;
+            box-shadow: 0 0 10px rgba(82, 196, 26, 0.5);
+        }
+
+        .indicator-warning {
+            background: #fa8c16;
+            box-shadow: 0 0 10px rgba(250, 140, 22, 0.5);
+        }
+
+        .indicator-error {
+            background: #ff4d4f;
+            box-shadow: 0 0 10px rgba(255, 77, 79, 0.5);
+        }
+
+        .service-name {
+            font-weight: 500;
+            color: #262626;
+        }
+
+        .service-metrics {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+
+        /* 详情面板 */
+        .details-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1890ff;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .panel-body {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* 告警项 */
+        .alert-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .alert-critical {
+            background: rgba(255, 77, 79, 0.2);
+            color: #ff4d4f;
+        }
+
+        .alert-warning {
+            background: rgba(250, 140, 22, 0.2);
+            color: #fa8c16;
+        }
+
+        .alert-info {
+            background: rgba(24, 144, 255, 0.2);
+            color: #40a9ff;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #262626;
+        }
+
+        .alert-desc {
+            font-size: 12px;
+            color: #8c8c8c;
+            margin-bottom: 4px;
+        }
+
+        .alert-time {
+            font-size: 11px;
+            color: #8c8c8c;
+        }
+
+        /* 日志项 */
+        .log-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        .log-time {
+            color: #8c8c8c;
+            min-width: 80px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-level {
+            min-width: 60px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-level.info { color: #40a9ff; }
+        .log-level.warning { color: #fa8c16; }
+        .log-level.error { color: #ff4d4f; }
+        .log-level.success { color: #52c41a; }
+
+        .log-message {
+            flex: 1;
+            color: #262626;
+        }
+
+        /* 性能指标 */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .metric-item {
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #8c8c8c;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1890ff;
+        }
+
+        .metric-unit {
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .monitor-charts {
+                grid-template-columns: 1fr;
+            }
+            
+            .details-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .status-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d9d9d9;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bfbfbf;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-header">
+        <div class="logo-section">
+            <div class="logo">AI</div>
+            <span class="system-title">AI创意动画管理后台</span>
+        </div>
+        <div class="header-actions">
+            <button class="refresh-btn" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+                刷新数据
+            </button>
+            <div class="notification-btn">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="user-menu">
+                <i class="fas fa-user-circle"></i>
+                <span>管理员</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边导航栏 -->
+    <aside class="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item" onclick="navigateTo('admin-dashboard.html')">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                系统仪表板
+            </div>
+            <div class="nav-item" onclick="navigateTo('content-management.html')">
+                <i class="fas fa-folder-open nav-icon"></i>
+                内容管理
+            </div>
+            <div class="nav-item" onclick="navigateTo('tech-config.html')">
+                <i class="fas fa-cogs nav-icon"></i>
+                技术配置
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-chart-line nav-icon"></i>
+                系统监控
+            </div>
+            <div class="nav-item" onclick="navigateTo('security-settings.html')">
+                <i class="fas fa-shield-alt nav-icon"></i>
+                安全设置
+            </div>
+        </nav>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">系统监控</h1>
+            <p class="page-description">实时监控系统运行状态和性能指标，及时发现和处理异常情况</p>
+        </div>
+
+        <!-- 状态概览 -->
+        <div class="status-overview">
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="status-title">系统状态</div>
+                <div class="status-value">正常</div>
+                <div class="status-desc">所有服务运行正常</div>
+                <div class="status-trend trend-up">
+                    <i class="fas fa-arrow-up"></i> 稳定运行 24天
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="status-title">平均响应</div>
+                <div class="status-value">2.3<span style="font-size: 16px;">s</span></div>
+                <div class="status-desc">API响应时间</div>
+                <div class="status-trend trend-down">
+                    <i class="fas fa-arrow-down"></i> 比昨日快 0.5s
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="status-title">调用量</div>
+                <div class="status-value">1,234</div>
+                <div class="status-desc">今日总调用次数</div>
+                <div class="status-trend trend-up">
+                    <i class="fas fa-arrow-up"></i> 比昨日增长 15%
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="status-title">成功率</div>
+                <div class="status-value">98.5<span style="font-size: 16px;">%</span></div>
+                <div class="status-desc">API调用成功率</div>
+                <div class="status-trend trend-up">
+                    <i class="fas fa-arrow-up"></i> 比昨日提升 0.2%
+                </div>
+            </div>
+        </div>
+
+        <!-- 监控图表区域 -->
+        <div class="monitor-charts">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">API调用趋势</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active">1小时</button>
+                        <button class="chart-btn">6小时</button>
+                        <button class="chart-btn">24小时</button>
+                        <button class="chart-btn">7天</button>
+                    </div>
+                </div>
+                <div class="chart-canvas" id="callTrendChart">
+                    <canvas id="callChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+
+            <div class="service-status">
+                <div class="chart-header">
+                    <h3 class="chart-title">服务状态</h3>
+                    <button class="chart-btn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="service-item">
+                    <div class="service-info">
+                        <div class="service-indicator indicator-normal"></div>
+                        <span class="service-name">文本生成服务</span>
+                    </div>
+                    <div class="service-metrics">
+                        <span>响应: 2.1s</span>
+                        <span>成功率: 99.2%</span>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-info">
+                        <div class="service-indicator indicator-normal"></div>
+                        <span class="service-name">图像生成服务</span>
+                    </div>
+                    <div class="service-metrics">
+                        <span>响应: 8.5s</span>
+                        <span>成功率: 98.7%</span>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-info">
+                        <div class="service-indicator indicator-warning"></div>
+                        <span class="service-name">语音合成服务</span>
+                    </div>
+                    <div class="service-metrics">
+                        <span>响应: 15.2s</span>
+                        <span>成功率: 96.5%</span>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-info">
+                        <div class="service-indicator indicator-normal"></div>
+                        <span class="service-name">内容审核服务</span>
+                    </div>
+                    <div class="service-metrics">
+                        <span>响应: 1.8s</span>
+                        <span>成功率: 99.8%</span>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-info">
+                        <div class="service-indicator indicator-normal"></div>
+                        <span class="service-name">数据库服务</span>
+                    </div>
+                    <div class="service-metrics">
+                        <span>连接: 45/100</span>
+                        <span>查询: 0.5ms</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 性能监控 -->
+        <div class="chart-container" style="margin-bottom: 24px;">
+            <div class="chart-header">
+                <h3 class="chart-title">性能指标</h3>
+                <div class="chart-controls">
+                    <button class="chart-btn">CPU</button>
+                    <button class="chart-btn active">内存</button>
+                    <button class="chart-btn">网络</button>
+                    <button class="chart-btn">磁盘</button>
+                </div>
+            </div>
+            <div class="metric-grid">
+                <div class="metric-item">
+                    <div class="metric-label">CPU使用率</div>
+                    <div class="metric-value">45.2<span class="metric-unit">%</span></div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">内存使用</div>
+                    <div class="metric-value">6.8<span class="metric-unit">GB</span></div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">网络I/O</div>
+                    <div class="metric-value">23.4<span class="metric-unit">MB/s</span></div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">磁盘I/O</div>
+                    <div class="metric-value">156<span class="metric-unit">IOPS</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详情面板 -->
+        <div class="details-panel">
+            <!-- 系统告警 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        系统告警
+                    </h3>
+                    <span style="background: rgba(255, 77, 79, 0.2); color: #ff4d4f; padding: 4px 8px; border-radius: 4px; font-size: 12px;">3个待处理</span>
+                </div>
+                <div class="panel-body">
+                    <div class="alert-item slide-in">
+                        <div class="alert-icon alert-warning">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">语音服务响应缓慢</div>
+                            <div class="alert-desc">平均响应时间超过10秒，影响用户体验</div>
+                            <div class="alert-time">3分钟前</div>
+                        </div>
+                    </div>
+                    <div class="alert-item slide-in">
+                        <div class="alert-icon alert-info">
+                            <i class="fas fa-info"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">系统维护计划</div>
+                            <div class="alert-desc">今晚23:00-01:00进行例行维护</div>
+                            <div class="alert-time">1小时前</div>
+                        </div>
+                    </div>
+                    <div class="alert-item slide-in">
+                        <div class="alert-icon alert-critical">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">API调用失败</div>
+                            <div class="alert-desc">文本生成服务出现间歇性失败</div>
+                            <div class="alert-time">2小时前</div>
+                        </div>
+                    </div>
+                    <div class="alert-item slide-in">
+                        <div class="alert-icon alert-info">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">配置更新完成</div>
+                            <div class="alert-desc">图像生成服务配置已成功更新</div>
+                            <div class="alert-time">4小时前</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作日志 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <i class="fas fa-list"></i>
+                        操作日志
+                    </h3>
+                    <button class="chart-btn">
+                        <i class="fas fa-download"></i>
+                        导出
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="log-item">
+                        <div class="log-time">14:35:42</div>
+                        <div class="log-level success">SUCCESS</div>
+                        <div class="log-message">API配置更新成功</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:32:18</div>
+                        <div class="log-level info">INFO</div>
+                        <div class="log-message">用户登录系统</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:28:56</div>
+                        <div class="log-level warning">WARNING</div>
+                        <div class="log-message">语音服务响应超时</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:25:33</div>
+                        <div class="log-level success">SUCCESS</div>
+                        <div class="log-message">数据库连接池重置</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:22:14</div>
+                        <div class="log-level error">ERROR</div>
+                        <div class="log-message">文本生成API调用失败</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:18:47</div>
+                        <div class="log-level info">INFO</div>
+                        <div class="log-message">系统健康检查完成</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:15:29</div>
+                        <div class="log-level success">SUCCESS</div>
+                        <div class="log-message">缓存清理完成</div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-time">14:12:08</div>
+                        <div class="log-level info">INFO</div>
+                        <div class="log-message">监控服务启动</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('callChart').getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(24, 144, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(24, 144, 255, 0.1)');
+            
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['14:00', '14:10', '14:20', '14:30', '14:40', '14:50', '15:00'],
+                    datasets: [{
+                        label: 'API调用量',
+                        data: [45, 52, 38, 67, 49, 73, 56],
+                        borderColor: '#40a9ff',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#40a9ff',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(24, 144, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8cc8ff'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(24, 144, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8cc8ff'
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 8
+                        }
+                    }
+                }
+            });
+            
+            return chart;
+        }
+
+        // 导航跳转函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // 刷新数据
+        function refreshData() {
+            const btn = event.target.closest('.refresh-btn');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刷新中...';
+            btn.disabled = true;
+            
+            // 模拟数据刷新
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                // 更新状态卡片数据
+                updateStatusCards();
+                
+                // 添加新的日志
+                addNewLog('INFO', '数据刷新完成');
+                
+                // 显示成功提示
+                showToast('数据刷新成功', 'success');
+            }, 2000);
+        }
+
+        // 更新状态卡片
+        function updateStatusCards() {
+            const cards = document.querySelectorAll('.status-card');
+            cards.forEach(card => {
+                card.style.animation = 'none';
+                setTimeout(() => {
+                    card.style.animation = 'slideIn 0.3s ease';
+                }, 50);
+            });
+        }
+
+        // 添加新日志
+        function addNewLog(level, message) {
+            const logBody = document.querySelector('.panel-body');
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0') + ':' +
+                        now.getSeconds().toString().padStart(2, '0');
+            
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item slide-in';
+            logItem.innerHTML = `
+                <div class="log-time">${time}</div>
+                <div class="log-level ${level.toLowerCase()}">${level}</div>
+                <div class="log-message">${message}</div>
+            `;
+            
+            logBody.insertBefore(logItem, logBody.firstChild);
+            
+            // 限制日志数量
+            const logItems = logBody.querySelectorAll('.log-item');
+            if (logItems.length > 20) {
+                logBody.removeChild(logItems[logItems.length - 1]);
+            }
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: '#52c41a',
+                error: '#ff4d4f',
+                warning: '#fa8c16',
+                info: '#1890ff'
+            };
+            
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type]};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                z-index: 2000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 实时数据更新
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                // 更新服务指示器状态
+                updateServiceIndicators();
+                
+                // 更新性能指标
+                updateMetrics();
+                
+                // 随机添加日志
+                if (Math.random() < 0.3) {
+                    const levels = ['INFO', 'SUCCESS', 'WARNING'];
+                    const messages = [
+                        'API调用成功',
+                        '健康检查完成',
+                        '缓存更新',
+                        '用户会话创建',
+                        '数据同步完成'
+                    ];
+                    const level = levels[Math.floor(Math.random() * levels.length)];
+                    const message = messages[Math.floor(Math.random() * messages.length)];
+                    addNewLog(level, message);
+                }
+            }, 5000);
+        }
+
+        // 更新服务指示器
+        function updateServiceIndicators() {
+            const indicators = document.querySelectorAll('.service-indicator');
+            indicators.forEach(indicator => {
+                // 随机改变状态（大部分时间保持正常）
+                if (Math.random() < 0.1) {
+                    indicator.className = 'service-indicator indicator-warning';
+                } else {
+                    indicator.className = 'service-indicator indicator-normal';
+                }
+            });
+        }
+
+        // 更新性能指标
+        function updateMetrics() {
+            const metricValues = document.querySelectorAll('.metric-value');
+            metricValues.forEach((value, index) => {
+                const current = parseFloat(value.textContent);
+                let newValue;
+                
+                switch(index) {
+                    case 0: // CPU
+                        newValue = (current + (Math.random() - 0.5) * 5).toFixed(1);
+                        break;
+                    case 1: // 内存
+                        newValue = (current + (Math.random() - 0.5) * 0.5).toFixed(1);
+                        break;
+                    case 2: // 网络
+                        newValue = (current + (Math.random() - 0.5) * 10).toFixed(1);
+                        break;
+                    case 3: // 磁盘
+                        newValue = Math.floor(current + (Math.random() - 0.5) * 20);
+                        break;
+                }
+                
+                if (newValue > 0) {
+                    value.innerHTML = newValue + value.innerHTML.match(/<span.*<\/span>/)[0];
+                }
+            });
+        }
+
+        // 图表控制按钮
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除同组按钮的激活状态
+                const group = btn.parentElement;
+                group.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                
+                // 激活当前按钮
+                btn.classList.add('active');
+                
+                // 这里可以添加切换图表数据的逻辑
+                console.log('切换图表视图:', btn.textContent);
+            });
+        });
+
+        // 响应式侧边栏
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('系统监控页面加载完成');
+            
+            // 初始化图表
+            initChart();
+            
+            // 开始实时更新
+            startRealTimeUpdates();
+            
+            // 显示欢迎消息
+            setTimeout(() => {
+                showToast('系统监控页面加载完成', 'success');
+            }, 1000);
+        });
+
+        // 添加CSS动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 

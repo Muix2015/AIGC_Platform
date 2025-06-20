@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品预览 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 30%, #16213e 70%, #0f3460 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 全局进度指示器 */
+        .global-progress-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .global-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        .global-progress-bar {
+            width: 400px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .global-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffa500);
+            width: 87.5%;
+            animation: pulse 2s infinite;
+        }
+
+        .global-steps {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #90A4AE;
+        }
+
+        .global-step {
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .global-step.completed {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .global-step.current {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        /* 顶部庆祝横幅 */
+        .celebration-header {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(147, 51, 234, 0.15));
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 25px 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .celebration-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .celebration-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .celebration-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffa500, #ff6b35);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        .celebration-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+        }
+
+        .achievement-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* 左侧作品信息 */
+        .work-info-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: fit-content;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .work-poster {
+            width: 100%;
+            height: 180px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .work-poster::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .work-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .work-description {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .description-title {
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .description-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .work-details {
+            space-y: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* 中央视频播放器 */
+        .video-player-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.2);
+            position: relative;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 480px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .video-player:hover .video-overlay {
+            opacity: 1;
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            background: #ffffff;
+        }
+
+        .video-controls {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .progress-container {
+            margin-bottom: 15px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff6b35);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, #ffd700, #ff6b35);
+            border-color: #ffd700;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffd700;
+            cursor: pointer;
+        }
+
+        /* 右侧导出分享 */
+        .export-share-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: fit-content;
+        }
+
+        .export-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #ffd700, #ff6b35);
+            border-radius: 2px;
+            margin-right: 12px;
+        }
+
+        .quality-options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quality-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quality-option:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .quality-option.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.15);
+        }
+
+        .quality-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quality-name {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .quality-desc {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .quality-size {
+            font-size: 14px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .export-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #22c1c3, #fdbb2d);
+            border: none;
+            border-radius: 15px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(34, 193, 195, 0.4);
+        }
+
+        .share-platforms {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .platform-btn {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .platform-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .platform-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        /* 底部操作按钮 */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+        }
+
+        /* 动画效果 */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .work-info-panel,
+            .export-share-panel {
+                order: 2;
+            }
+
+            .video-player-container {
+                order: 1;
+            }
+
+            .achievement-stats {
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .celebration-title {
+                font-size: 24px;
+            }
+
+            .video-player {
+                height: 300px;
+                font-size: 48px;
+            }
+
+            .play-button {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .share-platforms {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 加载和导出状态 */
+        .export-progress {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            display: none;
+        }
+
+        .export-progress.active {
+            display: block;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .export-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .export-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c1c3, #fdbb2d);
+            width: 0%;
+            transition: width 0.5s ease;
+            animation: progressGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes progressGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(34, 193, 195, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(34, 193, 195, 0.8); }
+        }
+
+        /* 成功提示 */
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(76, 175, 80, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .success-popup.show {
+            display: block;
+            animation: popupShow 0.5s ease-out;
+        }
+
+        @keyframes popupShow {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            100% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 全局进度指示器 -->
+        <div class="global-progress-header">
+            <div class="global-progress">
+                <span>创作流程进度</span>
+                <div class="global-progress-bar">
+                    <div class="global-progress-fill"></div>
+                </div>
+                <span>步骤 7/8</span>
+            </div>
+            <div class="global-steps">
+                <span class="global-step completed">故事</span>
+                <span class="global-step completed">剧本</span>
+                <span class="global-step completed">关键帧</span>
+                <span class="global-step completed">镜头</span>
+                <span class="global-step completed">合成</span>
+                <span class="global-step completed">配音</span>
+                <span class="global-step current">预览</span>
+                <span class="global-step">发布</span>
+            </div>
+        </div>
+
+        <!-- 顶部庆祝横幅 -->
+        <div class="celebration-header floating">
+            <div class="celebration-content">
+                <div class="celebration-title">🎉 恭喜！你的动画作品完成了！</div>
+                <div class="celebration-subtitle">经过精心制作，你的AI动画短片已经完美呈现</div>
+                <div class="achievement-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">创作步骤</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">58</div>
+                        <div class="stat-label">总时长(秒)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">角色</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">场景</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15</div>
+                        <div class="stat-label">制作时间(分钟)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 左侧作品信息 -->
+            <div class="work-info-panel floating" style="animation-delay: 0.2s;">
+                <div class="panel-header">
+                    <div class="panel-icon">📝</div>
+                    <div class="panel-title">作品信息</div>
+                </div>
+
+                <div class="work-poster">
+                    🎬
+                </div>
+
+                <div class="work-title">网络安全小卫士的冒险</div>
+
+                <div class="work-description">
+                    <div class="description-title">
+                        📖 故事简介
+                    </div>
+                    <div class="description-text">
+                        小明在网络世界中遇到了各种安全挑战，在网络安全小卫士的帮助下，学会了如何保护个人信息，识别网络诈骗，最终成为了一名优秀的网络安全小卫士。
+                    </div>
+                </div>
+
+                <div class="work-details">
+                    <div class="detail-item">
+                        <span class="detail-label">创作时间</span>
+                        <span class="detail-value">2024-01-15 14:30</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">视频时长</span>
+                        <span class="detail-value">58秒</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">分辨率</span>
+                        <span class="detail-value">1920×1080</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">帧率</span>
+                        <span class="detail-value">30 FPS</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">文件大小</span>
+                        <span class="detail-value">15.2 MB</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">创作模式</span>
+                        <span class="detail-value">模板创作</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中央视频播放器 -->
+            <div class="video-player-container floating" style="animation-delay: 0.1s;">
+                <div class="video-player" id="videoPlayer">
+                    🎥
+                    <div class="video-overlay">
+                        <div class="play-button">▶️</div>
+                    </div>
+                </div>
+
+                <div class="video-controls">
+                    <div class="progress-container">
+                        <div class="progress-info">
+                            <span>网络安全小卫士的冒险</span>
+                            <span><span id="currentTime">0:00</span> / <span id="totalTime">0:58</span></span>
+                        </div>
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                    <div class="control-buttons">
+                        <button class="control-btn" title="后退10秒">
+                            ⏪
+                        </button>
+                        <button class="control-btn primary" id="playPauseBtn" title="播放/暂停">
+                            ▶️
+                        </button>
+                        <button class="control-btn" title="前进10秒">
+                            ⏩
+                        </button>
+                        <button class="control-btn" title="全屏">
+                            ⛶
+                        </button>
+                        <div class="volume-control">
+                            <button class="control-btn" title="音量">
+                                🔊
+                            </button>
+                            <input type="range" class="volume-slider" min="0" max="100" value="75">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧导出分享 -->
+            <div class="export-share-panel floating" style="animation-delay: 0.3s;">
+                <div class="export-section">
+                    <div class="section-title">💾 导出设置</div>
+                    
+                    <div class="quality-options">
+                        <div class="quality-option selected">
+                            <div class="quality-info">
+                                <div class="quality-name">高清 (1080p)</div>
+                                <div class="quality-desc">适合分享和保存</div>
+                            </div>
+                            <div class="quality-size">15.2 MB</div>
+                        </div>
+                        <div class="quality-option">
+                            <div class="quality-info">
+                                <div class="quality-name">标清 (720p)</div>
+                                <div class="quality-desc">快速导出</div>
+                            </div>
+                            <div class="quality-size">8.5 MB</div>
+                        </div>
+                        <div class="quality-option">
+                            <div class="quality-info">
+                                <div class="quality-name">移动端 (480p)</div>
+                                <div class="quality-desc">手机观看</div>
+                            </div>
+                            <div class="quality-size">4.2 MB</div>
+                        </div>
+                    </div>
+
+                    <button class="export-button" id="exportBtn">
+                        📥 导出视频
+                    </button>
+
+                    <div class="export-progress" id="exportProgress">
+                        <div class="progress-text">正在导出视频... <span id="exportPercent">0%</span></div>
+                        <div class="export-progress-bar">
+                            <div class="export-progress-fill" id="exportProgressFill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <div class="section-title">🚀 分享作品</div>
+                    
+                    <div class="share-platforms">
+                        <button class="platform-btn" data-platform="wechat">
+                            <div class="platform-icon">💬</div>
+                            微信好友
+                        </button>
+                        <button class="platform-btn" data-platform="moments">
+                            <div class="platform-icon">📱</div>
+                            朋友圈
+                        </button>
+                        <button class="platform-btn" data-platform="qq">
+                            <div class="platform-icon">🐧</div>
+                            QQ空间
+                        </button>
+                        <button class="platform-btn" data-platform="copy">
+                            <div class="platform-icon">🔗</div>
+                            复制链接
+                        </button>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <div class="section-title">🎨 生成海报</div>
+                    <button class="export-button" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        🖼️ 制作分享海报
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部操作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="goBack()">
+                ← 返回编辑
+            </button>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-primary" onclick="saveToWorkspace()">
+                    📚 保存到作品集
+                </button>
+                <button class="btn btn-success" onclick="createNewWork()">
+                    ✨ 创作新作品
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示弹窗 -->
+    <div class="success-popup" id="successPopup">
+        <div class="success-icon">✅</div>
+        <div class="success-title">操作成功！</div>
+        <div class="success-message">你的作品已经成功保存</div>
+    </div>
+
+    <script>
+        // 视频播放控制
+        let isPlaying = false;
+        let currentTime = 0;
+        let totalTime = 58; // 58秒
+
+        function initVideoPlayer() {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const progressFill = document.getElementById('progressFill');
+            const currentTimeSpan = document.getElementById('currentTime');
+            const progressBar = document.getElementById('progressBar');
+
+            // 播放/暂停控制
+            function togglePlay() {
+                isPlaying = !isPlaying;
+                playPauseBtn.textContent = isPlaying ? '⏸️' : '▶️';
+                
+                if (isPlaying) {
+                    startProgress();
+                    console.log('开始播放视频');
+                } else {
+                    stopProgress();
+                    console.log('暂停播放视频');
+                }
+            }
+
+            playPauseBtn.addEventListener('click', togglePlay);
+            videoPlayer.addEventListener('click', togglePlay);
+
+            // 进度条控制
+            let progressInterval;
+
+            function startProgress() {
+                progressInterval = setInterval(() => {
+                    if (currentTime < totalTime) {
+                        currentTime += 0.1;
+                        updateProgress();
+                    } else {
+                        stopProgress();
+                        isPlaying = false;
+                        playPauseBtn.textContent = '▶️';
+                        currentTime = 0;
+                        updateProgress();
+                    }
+                }, 100);
+            }
+
+            function stopProgress() {
+                clearInterval(progressInterval);
+            }
+
+            function updateProgress() {
+                const percentage = (currentTime / totalTime) * 100;
+                progressFill.style.width = `${percentage}%`;
+                currentTimeSpan.textContent = formatTime(currentTime);
+            }
+
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // 进度条点击跳转
+            progressBar.addEventListener('click', function(e) {
+                const rect = progressBar.getBoundingClientRect();
+                const clickPosition = (e.clientX - rect.left) / rect.width;
+                currentTime = clickPosition * totalTime;
+                updateProgress();
+            });
+
+            // 其他控制按钮
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                if (btn.title === '后退10秒') {
+                    btn.addEventListener('click', () => {
+                        currentTime = Math.max(0, currentTime - 10);
+                        updateProgress();
+                    });
+                } else if (btn.title === '前进10秒') {
+                    btn.addEventListener('click', () => {
+                        currentTime = Math.min(totalTime, currentTime + 10);
+                        updateProgress();
+                    });
+                } else if (btn.title === '全屏') {
+                    btn.addEventListener('click', () => {
+                        console.log('切换全屏模式');
+                        // 这里可以添加全屏功能
+                    });
+                }
+            });
+
+            // 音量控制
+            const volumeSlider = document.querySelector('.volume-slider');
+            volumeSlider.addEventListener('input', function() {
+                console.log(`音量调节到: ${this.value}%`);
+            });
+        }
+
+        // 画质选择
+        function initQualitySelection() {
+            const qualityOptions = document.querySelectorAll('.quality-option');
+            
+            qualityOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    qualityOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    const qualityName = this.querySelector('.quality-name').textContent;
+                    console.log(`选择画质: ${qualityName}`);
+                });
+            });
+        }
+
+        // 导出功能
+        function initExportFeature() {
+            const exportBtn = document.getElementById('exportBtn');
+            const exportProgress = document.getElementById('exportProgress');
+            const exportProgressFill = document.getElementById('exportProgressFill');
+            const exportPercent = document.getElementById('exportPercent');
+
+            exportBtn.addEventListener('click', function() {
+                // 开始导出
+                this.disabled = true;
+                this.textContent = '📥 正在导出...';
+                exportProgress.classList.add('active');
+                
+                // 模拟导出进度
+                let progress = 0;
+                const exportInterval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 100) progress = 100;
+                    
+                    exportProgressFill.style.width = `${progress}%`;
+                    exportPercent.textContent = `${Math.floor(progress)}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(exportInterval);
+                        setTimeout(() => {
+                            exportProgress.classList.remove('active');
+                            exportBtn.disabled = false;
+                            exportBtn.textContent = '📥 导出视频';
+                            showSuccess('视频导出成功！');
+                        }, 500);
+                    }
+                }, 200);
+            });
+        }
+
+        // 分享平台
+        function initShareFeatures() {
+            const platformBtns = document.querySelectorAll('.platform-btn');
+            
+            platformBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const platform = this.dataset.platform;
+                    
+                    switch(platform) {
+                        case 'wechat':
+                            console.log('分享到微信好友');
+                            showSuccess('已复制到剪贴板，请在微信中分享');
+                            break;
+                        case 'moments':
+                            console.log('分享到朋友圈');
+                            showSuccess('已复制到剪贴板，请在朋友圈中分享');
+                            break;
+                        case 'qq':
+                            console.log('分享到QQ空间');
+                            showSuccess('正在跳转到QQ空间...');
+                            break;
+                        case 'copy':
+                            console.log('复制分享链接');
+                            showSuccess('分享链接已复制到剪贴板');
+                            break;
+                    }
+                });
+            });
+        }
+
+        // 成功提示
+        function showSuccess(message) {
+            const popup = document.getElementById('successPopup');
+            const messageEl = popup.querySelector('.success-message');
+            
+            messageEl.textContent = message;
+            popup.classList.add('show');
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        // 导航功能
+        function goBack() {
+            if (confirm('确定要返回配音配乐编辑阶段吗？')) {
+                window.location.href = 'audio-production.html';
+            }
+        }
+
+        function saveToWorkspace() {
+            showSuccess('作品已保存到作品集');
+            setTimeout(() => {
+                if (confirm('作品已保存成功！是否查看我的作品集？')) {
+                    window.location.href = 'work-management.html';
+                }
+            }, 2000);
+        }
+
+        function createNewWork() {
+            if (confirm('即将开始创作新作品，是否继续？')) {
+                showSuccess('即将跳转到创作页面...');
+                setTimeout(() => {
+                    window.location.href = 'creation-hall.html';
+                }, 1500);
+            }
+        }
+
+        // 主要操作按钮
+        function initMainActions() {
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.textContent.trim();
+                    
+                    if (text.includes('制作分享海报')) {
+                        console.log('制作分享海报');
+                        showSuccess('正在生成专属海报...');
+                    }
+                });
+            });
+        }
+
+        // 自动播放演示
+        function autoPlayDemo() {
+            setTimeout(() => {
+                if (!isPlaying) {
+                    document.getElementById('playPauseBtn').click();
+                }
+            }, 2000);
+        }
+
+        // 初始化所有功能
+        document.addEventListener('DOMContentLoaded', function() {
+            initVideoPlayer();
+            initQualitySelection();
+            initExportFeature();
+            initShareFeatures();
+            initMainActions();
+            
+            // 2秒后自动播放演示
+            autoPlayDemo();
+        });
+
+        // 添加按钮点击反馈
+        document.querySelectorAll('.btn, .control-btn, .platform-btn, .export-button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // 添加一些视觉效果
+        document.addEventListener('mousemove', function(e) {
+            const celebration = document.querySelector('.celebration-header');
+            const rect = celebration.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            
+            if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+                celebration.style.background = `
+                    linear-gradient(135deg, 
+                        rgba(255, 215, 0, ${0.15 + x * 0.1}), 
+                        rgba(147, 51, 234, ${0.15 + y * 0.1}))
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

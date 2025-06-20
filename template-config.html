@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意动画创作星球 - 模板配置实验室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f1635 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* 星空背景 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航和进度条 */
+        .top-section {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+            z-index: 100;
+            padding: 20px 40px;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(79, 195, 247, 0.2);
+            border: 1px solid rgba(79, 195, 247, 0.5);
+            border-radius: 25px;
+            padding: 12px 20px;
+            color: #4FC3F7;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+            transform: translateX(-5px);
+        }
+
+        .page-title {
+            font-size: 24px;
+            background: linear-gradient(135deg, #00E5FF, #4FC3F7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 进度指示器 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(79, 195, 247, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00A8FF, #00E5FF);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            display: flex;
+            gap: 40px;
+            padding: 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* 左侧配置区域 */
+        .config-area {
+            flex: 1;
+            max-width: 900px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            color: #00E5FF;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: #4FC3F7;
+            opacity: 0.9;
+        }
+
+        /* 配置区块 */
+        .config-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .config-section:hover {
+            border-color: rgba(0, 229, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #00E5FF;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            font-size: 28px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: rgba(0, 229, 255, 0.6);
+            box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3);
+        }
+
+        .option-card.selected {
+            border-color: #00E5FF;
+            background: rgba(0, 229, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+
+        .option-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .option-title {
+            font-size: 16px;
+            color: #4FC3F7;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .option-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        /* 右侧预览面板 */
+        .preview-panel {
+            position: sticky;
+            top: 120px;
+            width: 350px;
+            height: fit-content;
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.1), rgba(0, 229, 255, 0.1));
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(124, 77, 255, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(124, 77, 255, 0.2);
+        }
+
+        .preview-title {
+            font-size: 20px;
+            color: #7C4DFF;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(124, 77, 255, 0.5);
+        }
+
+        .preview-content {
+            margin-bottom: 25px;
+        }
+
+        .preview-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(124, 77, 255, 0.2);
+        }
+
+        .preview-label {
+            color: #4FC3F7;
+            font-size: 14px;
+        }
+
+        .preview-value {
+            color: #7C4DFF;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .preview-story {
+            background: rgba(124, 77, 255, 0.1);
+            border: 1px solid rgba(124, 77, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .story-preview-title {
+            color: #7C4DFF;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .story-preview-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 生成按钮 */
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 193, 7, 0.5);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 最终确认区域 */
+        .final-section {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border: 2px solid rgba(255, 193, 7, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .final-title {
+            font-size: 28px;
+            color: #FFC107;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+        }
+
+        .final-description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .final-btn {
+            padding: 20px 60px;
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(255, 193, 7, 0.4);
+        }
+
+        .final-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 193, 7, 0.6);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .preview-panel {
+                position: static;
+                width: 100%;
+                margin-top: 30px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .options-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .option-card {
+                padding: 15px;
+            }
+
+            .option-icon {
+                font-size: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .option-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <div class="main-container">
+        <!-- 顶部导航和进度条 -->
+        <div class="top-section">
+            <div class="nav-bar">
+                <a href="create-mode.html" class="back-btn">
+                    <span>⬅️</span>
+                    <span>返回模式选择</span>
+                </a>
+                <div class="page-title">🧪 模板配置实验室</div>
+                <div></div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <!-- 左侧配置区域 -->
+            <div class="config-area">
+                <!-- 页面标题 -->
+                <div class="page-header">
+                    <h1>🎭 定制你的专属故事模板</h1>
+                    <p>通过简单的配置选择，AI将为你生成独一无二的动画故事</p>
+                </div>
+
+                <!-- 故事类型选择 -->
+                <div class="config-section" data-section="type">
+                    <h2 class="section-title">
+                        <span class="section-icon">📚</span>
+                        选择故事类型
+                    </h2>
+                    <div class="options-grid">
+                        <div class="option-card" data-option="fairy-tale">
+                            <span class="option-icon">🏰</span>
+                            <div class="option-title">童话故事</div>
+                            <div class="option-description">充满魔法与奇迹的经典童话世界</div>
+                        </div>
+                        <div class="option-card" data-option="sci-fi">
+                            <span class="option-icon">🚀</span>
+                            <div class="option-title">科幻冒险</div>
+                            <div class="option-description">探索未来科技与星际文明</div>
+                        </div>
+                        <div class="option-card" data-option="mystery">
+                            <span class="option-icon">🔍</span>
+                            <div class="option-title">悬疑推理</div>
+                            <div class="option-description">解开谜题，揭示真相的智慧之旅</div>
+                        </div>
+                        <div class="option-card" data-option="adventure">
+                            <span class="option-icon">⚔️</span>
+                            <div class="option-title">奇幻冒险</div>
+                            <div class="option-description">魔法世界的英雄传说</div>
+                        </div>
+                        <div class="option-card" data-option="security">
+                            <span class="option-icon">🛡️</span>
+                            <div class="option-title">网络安全</div>
+                            <div class="option-description">数字世界的守护者故事</div>
+                        </div>
+                        <div class="option-card" data-option="nature">
+                            <span class="option-icon">🌱</span>
+                            <div class="option-title">环保教育</div>
+                            <div class="option-description">保护地球家园的温馨故事</div>
+                        </div>
+                        <div class="option-card" data-option="history">
+                            <span class="option-icon">🎭</span>
+                            <div class="option-title">历史传奇</div>
+                            <div class="option-description">穿越时空的历史冒险故事</div>
+                        </div>
+                        <div class="option-card" data-option="school">
+                            <span class="option-icon">🌟</span>
+                            <div class="option-title">现代校园</div>
+                            <div class="option-description">青春活力的校园生活故事</div>
+                        </div>
+                        <div class="option-card" data-option="art">
+                            <span class="option-icon">🎨</span>
+                            <div class="option-title">艺术创作</div>
+                            <div class="option-description">充满创意和美感的艺术故事</div>
+                        </div>
+                        <div class="option-card" data-option="custom-type">
+                            <span class="option-icon">⚡</span>
+                            <div class="option-title">自定义故事</div>
+                            <div class="option-description">完全自由定制的故事类型</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主人公选择 -->
+                <div class="config-section" data-section="character">
+                    <h2 class="section-title">
+                        <span class="section-icon">🎭</span>
+                        选择故事主角
+                    </h2>
+                    <div class="options-grid">
+                        <div class="option-card" data-option="hacker">
+                            <span class="option-icon">👩‍💻</span>
+                            <div class="option-title">天才骇客</div>
+                            <div class="option-description">拥有超凡编程技能的数字英雄</div>
+                        </div>
+                        <div class="option-card" data-option="superhero">
+                            <span class="option-icon">🦸</span>
+                            <div class="option-title">超能力者</div>
+                            <div class="option-description">具有神奇能力的正义使者</div>
+                        </div>
+                        <div class="option-card" data-option="ninja">
+                            <span class="option-icon">🥋</span>
+                            <div class="option-title">武学奇才</div>
+                            <div class="option-description">身怀绝技的神秘武者</div>
+                        </div>
+                        <div class="option-card" data-option="scientist">
+                            <span class="option-icon">👨‍🔬</span>
+                            <div class="option-title">少年科学家</div>
+                            <div class="option-description">聪明睿智的小小发明家</div>
+                        </div>
+                        <div class="option-card" data-option="animal-friend">
+                            <span class="option-icon">🐱</span>
+                            <div class="option-title">动物之友</div>
+                            <div class="option-description">能与动物沟通的特殊少年</div>
+                        </div>
+                        <div class="option-card" data-option="robot">
+                            <span class="option-icon">🤖</span>
+                            <div class="option-title">智能机器人</div>
+                            <div class="option-description">拥有情感的未来伙伴</div>
+                        </div>
+                        <div class="option-card" data-option="princess">
+                            <span class="option-icon">👸</span>
+                            <div class="option-title">勇敢公主</div>
+                            <div class="option-description">具有勇气与智慧的王室公主</div>
+                        </div>
+                        <div class="option-card" data-option="wizard">
+                            <span class="option-icon">🧙‍♂️</span>
+                            <div class="option-title">魔法师</div>
+                            <div class="option-description">掌握神秘魔法的法师</div>
+                        </div>
+                        <div class="option-card" data-option="detective">
+                            <span class="option-icon">🕵️</span>
+                            <div class="option-title">侦探高手</div>
+                            <div class="option-description">善于推理破案的小侦探</div>
+                        </div>
+                        <div class="option-card" data-option="custom-character">
+                            <span class="option-icon">✨</span>
+                            <div class="option-title">自定义角色</div>
+                            <div class="option-description">完全自由定制的独特主角</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 故事场景选择 -->
+                <div class="config-section" data-section="scene">
+                    <h2 class="section-title">
+                        <span class="section-icon">🌍</span>
+                        选择故事场景
+                    </h2>
+                    <div class="options-grid">
+                        <div class="option-card" data-option="magic-forest">
+                            <span class="option-icon">🌲</span>
+                            <div class="option-title">魔法森林</div>
+                            <div class="option-description">充满神秘生物的奇幻森林</div>
+                        </div>
+                        <div class="option-card" data-option="castle">
+                            <span class="option-icon">🏰</span>
+                            <div class="option-title">迷幻城堡</div>
+                            <div class="option-description">古老神秘的魔法城堡</div>
+                        </div>
+                        <div class="option-card" data-option="school">
+                            <span class="option-icon">🏫</span>
+                            <div class="option-title">现代学校</div>
+                            <div class="option-description">充满活力的校园生活</div>
+                        </div>
+                        <div class="option-card" data-option="future-city">
+                            <span class="option-icon">🌆</span>
+                            <div class="option-title">未来都市</div>
+                            <div class="option-description">科技发达的未来城市</div>
+                        </div>
+                        <div class="option-card" data-option="underwater">
+                            <span class="option-icon">🌊</span>
+                            <div class="option-title">深海世界</div>
+                            <div class="option-description">神秘的海底王国</div>
+                        </div>
+                        <div class="option-card" data-option="space">
+                            <span class="option-icon">⭐</span>
+                            <div class="option-title">外太空基地</div>
+                            <div class="option-description">星际探索的前哨站</div>
+                        </div>
+                        <div class="option-card" data-option="palace">
+                            <span class="option-icon">🏛️</span>
+                            <div class="option-title">古代宫殿</div>
+                            <div class="option-description">富丽堂皇的古代皇宫</div>
+                        </div>
+                        <div class="option-card" data-option="circus">
+                            <span class="option-icon">🎪</span>
+                            <div class="option-title">奇幻马戏团</div>
+                            <div class="option-description">充满魔法的神奇马戏团</div>
+                        </div>
+                        <div class="option-card" data-option="island">
+                            <span class="option-icon">🌋</span>
+                            <div class="option-title">神秘岛屿</div>
+                            <div class="option-description">隐藏秘密的无人岛屿</div>
+                        </div>
+                        <div class="option-card" data-option="custom-scene">
+                            <span class="option-icon">✨</span>
+                            <div class="option-title">自定义场景</div>
+                            <div class="option-description">完全自由定制的故事场景</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 艺术风格选择 -->
+                <div class="config-section" data-section="style">
+                    <h2 class="section-title">
+                        <span class="section-icon">🎨</span>
+                        选择艺术风格
+                    </h2>
+                    <div class="options-grid">
+                        <div class="option-card" data-option="pixar">
+                            <span class="option-icon">🎬</span>
+                            <div class="option-title">Pixar风格3D</div>
+                            <div class="option-description">精美细腻的3D动画风格</div>
+                        </div>
+                        <div class="option-card" data-option="disney">
+                            <span class="option-icon">🎨</span>
+                            <div class="option-title">迪士尼经典</div>
+                            <div class="option-description">温馨经典的手绘动画风格</div>
+                        </div>
+                        <div class="option-card" data-option="miyazaki">
+                            <span class="option-icon">🌸</span>
+                            <div class="option-title">宫崎骏风格</div>
+                            <div class="option-description">唯美治愈的日式动画</div>
+                        </div>
+                        <div class="option-card" data-option="nezha">
+                            <span class="option-icon">⚡</span>
+                            <div class="option-title">哪吒魔童风格</div>
+                            <div class="option-description">现代国产动画的精品风格</div>
+                        </div>
+                        <div class="option-card" data-option="illustration">
+                            <span class="option-icon">🖼️</span>
+                            <div class="option-title">现代儿童插画</div>
+                            <div class="option-description">清新可爱的插画风格</div>
+                        </div>
+                        <div class="option-card" data-option="watercolor">
+                            <span class="option-icon">🖼️</span>
+                            <div class="option-title">水彩画风格</div>
+                            <div class="option-description">柔和梦幻的水彩效果</div>
+                        </div>
+                        <div class="option-card" data-option="pixel">
+                            <span class="option-icon">🎮</span>
+                            <div class="option-title">像素艺术风格</div>
+                            <div class="option-description">复古经典的像素游戏风格</div>
+                        </div>
+                        <div class="option-card" data-option="custom-style">
+                            <span class="option-icon">✨</span>
+                            <div class="option-title">自定义风格</div>
+                            <div class="option-description">完全自由定制的艺术风格</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 故事长度选择 -->
+                <div class="config-section" data-section="duration">
+                    <h2 class="section-title">
+                        <span class="section-icon">⏰</span>
+                        选择故事长度
+                    </h2>
+                    <div class="options-grid">
+                        <div class="option-card" data-option="short">
+                            <span class="option-icon">⚡</span>
+                            <div class="option-title">短篇</div>
+                            <div class="option-description">30秒-1分钟的精彩片段</div>
+                        </div>
+                        <div class="option-card" data-option="medium">
+                            <span class="option-icon">📖</span>
+                            <div class="option-title">中篇</div>
+                            <div class="option-description">2-3分钟的完整故事</div>
+                        </div>
+                        <div class="option-card" data-option="long">
+                            <span class="option-icon">🎬</span>
+                            <div class="option-title">长篇</div>
+                            <div class="option-description">5-8分钟的史诗级动画</div>
+                        </div>
+                        <div class="option-card" data-option="custom">
+                            <span class="option-icon">✨</span>
+                            <div class="option-title">自定义</div>
+                            <div class="option-description">根据故事需要自由调整时长</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最终确认区域 -->
+                <div class="final-section">
+                    <h2 class="final-title">🎊 配置完成！</h2>
+                    <p class="final-description">
+                        太棒了！你已经完成了所有配置选择。现在AI将根据你的偏好生成一个专属的故事大纲，
+                        这将是你独一无二的创作起点。准备好开始你的创意之旅了吗？
+                    </p>
+                    <button class="final-btn" id="generateStory">🚀 生成AI故事大纲</button>
+                </div>
+            </div>
+
+            <!-- 右侧预览面板 -->
+            <div class="preview-panel">
+                <h3 class="preview-title">🔮 实时预览</h3>
+                <div class="preview-content">
+                    <div class="preview-item">
+                        <span class="preview-label">故事类型:</span>
+                        <span class="preview-value" id="previewType">未选择</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">主角:</span>
+                        <span class="preview-value" id="previewCharacter">未选择</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">场景:</span>
+                        <span class="preview-value" id="previewScene">未选择</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">风格:</span>
+                        <span class="preview-value" id="previewStyle">未选择</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">时长:</span>
+                        <span class="preview-value" id="previewDuration">未选择</span>
+                    </div>
+                </div>
+                
+                <div class="preview-story">
+                    <div class="story-preview-title">📝 故事预览</div>
+                    <div class="story-preview-text" id="storyPreview">
+                        选择配置参数，AI将为你生成精彩的故事预览...
+                    </div>
+                </div>
+                
+                <button class="generate-btn" id="generatePreview" disabled>
+                    ✨ 生成故事预览
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置数据
+        const config = {
+            type: null,
+            character: null,
+            scene: null,
+            style: null,
+            duration: null
+        };
+
+        // 配置选项数据
+        const optionData = {
+            type: {
+                'fairy-tale': '童话故事',
+                'sci-fi': '科幻冒险',
+                'mystery': '悬疑推理',
+                'adventure': '奇幻冒险',
+                'security': '网络安全',
+                'nature': '环保教育',
+                'history': '历史传奇',
+                'school': '现代校园',
+                'art': '艺术创作',
+                'custom-type': '自定义故事'
+            },
+            character: {
+                'hacker': '天才骇客',
+                'superhero': '超能力者',
+                'ninja': '武学奇才',
+                'scientist': '少年科学家',
+                'animal-friend': '动物之友',
+                'robot': '智能机器人',
+                'princess': '勇敢公主',
+                'wizard': '魔法师',
+                'detective': '侦探高手',
+                'custom-character': '自定义角色'
+            },
+            scene: {
+                'magic-forest': '魔法森林',
+                'castle': '迷幻城堡',
+                'school': '现代学校',
+                'future-city': '未来都市',
+                'underwater': '深海世界',
+                'space': '外太空基地',
+                'palace': '古代宫殿',
+                'circus': '奇幻马戏团',
+                'island': '神秘岛屿',
+                'custom-scene': '自定义场景'
+            },
+            style: {
+                'pixar': 'Pixar风格3D',
+                'disney': '迪士尼经典',
+                'miyazaki': '宫崎骏风格',
+                'nezha': '哪吒魔童风格',
+                'illustration': '现代儿童插画',
+                'watercolor': '水彩画风格',
+                'pixel': '像素艺术风格',
+                'custom-style': '自定义风格'
+            },
+            duration: {
+                'short': '短篇',
+                'medium': '中篇',
+                'long': '长篇',
+                'custom': '自定义'
+            }
+        };
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            initializeOptions();
+            updateProgress();
+        });
+
+        // 星空背景生成
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const starCount = 100;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // 初始化选项卡片
+        function initializeOptions() {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const section = this.closest('.config-section').dataset.section;
+                    const option = this.dataset.option;
+                    
+                    // 取消同组其他选项
+                    this.closest('.config-section').querySelectorAll('.option-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // 选中当前选项
+                    this.classList.add('selected');
+                    
+                    // 更新配置
+                    config[section] = option;
+                    
+                    // 更新预览
+                    updatePreview(section, option);
+                    
+                    // 更新进度
+                    updateProgress();
+                    
+                    // 生成故事预览
+                    generateStoryPreview();
+                });
+            });
+        }
+
+        // 更新预览面板
+        function updatePreview(section, option) {
+            const previewElement = document.getElementById(`preview${section.charAt(0).toUpperCase() + section.slice(1)}`);
+            if (previewElement) {
+                previewElement.textContent = optionData[section][option] || option;
+            }
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const totalSections = 5;
+            const completedSections = Object.values(config).filter(v => v !== null).length;
+            const progress = (completedSections / totalSections) * 100;
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // 更新生成按钮状态
+            const generateBtn = document.getElementById('generatePreview');
+            if (completedSections >= 3) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '✨ 生成故事预览';
+            } else {
+                generateBtn.disabled = true;
+                generateBtn.textContent = `还需选择 ${3 - completedSections} 个配置`;
+            }
+            
+            // 最终生成按钮
+            const finalBtn = document.getElementById('generateStory');
+            if (completedSections === totalSections) {
+                finalBtn.style.background = 'linear-gradient(135deg, #00E676, #4CAF50)';
+                finalBtn.textContent = '🚀 生成AI故事大纲';
+            }
+        }
+
+        // 生成故事预览
+        function generateStoryPreview() {
+            const completedCount = Object.values(config).filter(v => v !== null).length;
+            if (completedCount < 3) return;
+            
+            const storyPreview = document.getElementById('storyPreview');
+            
+            // 模拟生成故事预览
+            let preview = '';
+            
+            if (config.type && config.character && config.scene) {
+                const typeText = optionData.type[config.type];
+                const characterText = optionData.character[config.character];
+                const sceneText = optionData.scene[config.scene];
+                
+                preview = `在${sceneText}中，${characterText}将展开一场${typeText}的精彩冒险。`;
+                
+                if (config.style) {
+                    preview += `整个故事将采用${optionData.style[config.style]}进行呈现，`;
+                }
+                
+                if (config.duration) {
+                    preview += `制作成一部${optionData.duration[config.duration]}。`;
+                }
+                
+                preview += ' 这将是一个充满创意和想象力的独特故事！';
+            }
+            
+            if (preview) {
+                storyPreview.textContent = preview;
+            }
+        }
+
+        // 生成预览按钮事件
+        document.getElementById('generatePreview').addEventListener('click', function() {
+            this.textContent = '⚡ 正在生成...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                generateStoryPreview();
+                this.textContent = '✅ 预览已生成';
+                setTimeout(() => {
+                    this.textContent = '✨ 重新生成预览';
+                    this.disabled = false;
+                }, 2000);
+            }, 1500);
+        });
+
+        // 最终生成按钮事件
+        document.getElementById('generateStory').addEventListener('click', function() {
+            const completedCount = Object.values(config).filter(v => v !== null).length;
+            
+            if (completedCount < 5) {
+                alert(`请完成所有配置选择！还需要选择 ${5 - completedCount} 个配置项。`);
+                return;
+            }
+            
+            // 显示生成动画
+            this.textContent = '🔮 AI正在生成故事大纲...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                alert(`🎊 配置完成！\n\n你的故事设定：\n• 类型：${optionData.type[config.type]}\n• 主角：${optionData.character[config.character]}\n• 场景：${optionData.scene[config.scene]}\n• 风格：${optionData.style[config.style]}\n• 时长：${optionData.duration[config.duration]}\n\nAI正在为你生成专属的故事大纲，即将跳转到故事编辑页面...`);
+                
+                // 跳转到故事大纲页面
+                window.location.href = 'story-outline.html?' + new URLSearchParams(config).toString();
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

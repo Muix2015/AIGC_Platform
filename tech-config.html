@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术配置 - AI创意动画管理后台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        /* 顶部导航栏 */
+        .top-header {
+            height: 64px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-btn, .user-menu {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .notification-btn:hover, .user-menu:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 侧边导航栏 */
+        .sidebar {
+            width: 240px;
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 64px;
+            border-right: 1px solid #e8e8e8;
+            overflow-y: auto;
+        }
+
+        .nav-menu {
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #1890ff;
+        }
+
+        .nav-icon {
+            width: 16px;
+            margin-right: 12px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: #8c8c8c;
+            font-size: 14px;
+        }
+
+        /* 状态概览 */
+        .status-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .status-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 20px;
+        }
+
+        .status-normal { background: #f6ffed; color: #52c41a; }
+        .status-warning { background: #fff7e6; color: #fa8c16; }
+        .status-error { background: #fff2f0; color: #ff4d4f; }
+        .status-info { background: #e6f7ff; color: #1890ff; }
+
+        .status-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .status-desc {
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+
+        /* 配置区域 */
+        .config-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .config-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .config-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* 服务配置卡片 */
+        .service-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .service-header {
+            padding: 20px 24px;
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .service-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .service-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .service-details p {
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .service-body {
+            padding: 24px;
+        }
+
+        .config-section {
+            margin-bottom: 24px;
+        }
+
+        .config-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #262626;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #8c8c8c;
+        }
+
+        .config-input {
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        .config-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #1890ff;
+            border: 1px solid #1890ff;
+        }
+
+        .btn-outline:hover {
+            background: #e6f7ff;
+        }
+
+        .btn-danger {
+            background: #ff4d4f;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #ff7875;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: #1890ff;
+            padding: 4px 8px;
+        }
+
+        /* 测试面板 */
+        .test-panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .test-header {
+            padding: 16px 20px;
+            background: #f0f9ff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .test-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1890ff;
+        }
+
+        .test-body {
+            padding: 20px;
+        }
+
+        .test-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            resize: vertical;
+        }
+
+        .test-result {
+            background: #f8f9fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .test-success {
+            border-color: #52c41a;
+            background: #f6ffed;
+        }
+
+        .test-error {
+            border-color: #ff4d4f;
+            background: #fff2f0;
+        }
+
+        /* 监控面板 */
+        .monitor-panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .monitor-header {
+            padding: 16px 20px;
+            background: #f0f9ff;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .monitor-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1890ff;
+        }
+
+        .monitor-body {
+            padding: 20px;
+        }
+
+        .monitor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .monitor-item:last-child {
+            border-bottom: none;
+        }
+
+        .monitor-label {
+            font-size: 14px;
+            color: #8c8c8c;
+        }
+
+        .monitor-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* 日志面板 */
+        .log-panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .log-header {
+            padding: 16px 20px;
+            background: #f0f9ff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-body {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        .log-time {
+            color: #8c8c8c;
+            min-width: 80px;
+        }
+
+        .log-level {
+            min-width: 60px;
+            font-weight: 600;
+        }
+
+        .log-level.info { color: #1890ff; }
+        .log-level.warning { color: #fa8c16; }
+        .log-level.error { color: #ff4d4f; }
+        .log-level.success { color: #52c41a; }
+
+        .log-message {
+            flex: 1;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .config-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .status-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .service-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+
+        /* 动画效果 */
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-header">
+        <div class="logo-section">
+            <div class="logo">AI</div>
+            <span class="system-title">AI创意动画管理后台</span>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="user-menu">
+                <i class="fas fa-user-circle"></i>
+                <span>管理员</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边导航栏 -->
+    <aside class="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item" onclick="navigateTo('admin-dashboard.html')">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                系统仪表板
+            </div>
+            <div class="nav-item" onclick="navigateTo('content-management.html')">
+                <i class="fas fa-folder-open nav-icon"></i>
+                内容管理
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-cogs nav-icon"></i>
+                技术配置
+            </div>
+            <div class="nav-item" onclick="navigateTo('system-monitor.html')">
+                <i class="fas fa-chart-line nav-icon"></i>
+                系统监控
+            </div>
+            <div class="nav-item" onclick="navigateTo('security-settings.html')">
+                <i class="fas fa-shield-alt nav-icon"></i>
+                安全设置
+            </div>
+        </nav>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">技术配置</h1>
+            <p class="page-description">配置系统技术参数和API设置，管理各类AI服务接口和模型参数</p>
+        </div>
+
+        <!-- 状态概览 -->
+        <div class="status-overview">
+            <div class="status-card">
+                <div class="status-icon status-normal">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="status-title">API服务</div>
+                <div class="status-value">4/5</div>
+                <div class="status-desc">正常运行</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon status-info">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="status-title">平均响应</div>
+                <div class="status-value">2.3s</div>
+                <div class="status-desc">响应时间</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon status-normal">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="status-title">成功率</div>
+                <div class="status-value">98.5%</div>
+                <div class="status-desc">调用成功率</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon status-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="status-title">待处理</div>
+                <div class="status-value">3</div>
+                <div class="status-desc">配置更新</div>
+            </div>
+        </div>
+
+        <!-- 配置容器 -->
+        <div class="config-container">
+            <!-- 主配置区域 -->
+            <div class="config-main">
+                <!-- 文本生成服务 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-info">
+                            <div class="service-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-pen-fancy"></i>
+                            </div>
+                            <div class="service-details">
+                                <h3>文本生成服务</h3>
+                                <p>智谱GLM-4 + 通义千问</p>
+                            </div>
+                        </div>
+                        <div class="service-status">
+                            <span class="status-indicator status-normal">正常运行</span>
+                            <button class="btn-text" onclick="testService('text')">
+                                <i class="fas fa-play"></i>
+                                测试
+                            </button>
+                        </div>
+                    </div>
+                    <div class="service-body">
+                        <div class="config-section">
+                            <div class="section-title">主要服务配置</div>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">服务名称</label>
+                                    <input type="text" class="config-input" value="智谱GLM-4" readonly>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">API地址</label>
+                                    <input type="text" class="config-input" value="https://open.bigmodel.cn/api/paas/v4/">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">API密钥</label>
+                                    <input type="password" class="config-input" value="sk-**********************8f2a">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">模型版本</label>
+                                    <select class="config-input">
+                                        <option value="glm-4">glm-4</option>
+                                        <option value="glm-4-flash">glm-4-flash</option>
+                                        <option value="glm-4-plus">glm-4-plus</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <div class="section-title">模型参数</div>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">温度参数 (0-1)</label>
+                                    <input type="number" class="config-input" value="0.7" min="0" max="1" step="0.1">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">最大长度</label>
+                                    <input type="number" class="config-input" value="2048" min="1" max="4096">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Top-P</label>
+                                    <input type="number" class="config-input" value="0.9" min="0" max="1" step="0.1">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">超时时间(秒)</label>
+                                    <input type="number" class="config-input" value="30" min="5" max="120">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <div class="section-title">备用服务配置</div>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">备用服务</label>
+                                    <select class="config-input">
+                                        <option value="qwen">通义千问</option>
+                                        <option value="baidu">文心一言</option>
+                                        <option value="none">不使用备用</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">故障转移策略</label>
+                                    <select class="config-input">
+                                        <option value="auto">自动切换</option>
+                                        <option value="manual">手动切换</option>
+                                        <option value="disabled">禁用</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-actions">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                保存配置
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-undo"></i>
+                                重置配置
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-download"></i>
+                                导出配置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图像生成服务 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-info">
+                            <div class="service-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <div class="service-details">
+                                <h3>图像生成服务</h3>
+                                <p>通义万相 + Stable Diffusion</p>
+                            </div>
+                        </div>
+                        <div class="service-status">
+                            <span class="status-indicator status-normal">正常运行</span>
+                            <button class="btn-text" onclick="testService('image')">
+                                <i class="fas fa-play"></i>
+                                测试
+                            </button>
+                        </div>
+                    </div>
+                    <div class="service-body">
+                        <div class="config-section">
+                            <div class="section-title">服务配置</div>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">主要服务</label>
+                                    <select class="config-input">
+                                        <option value="wanx">通义万相</option>
+                                        <option value="sd">Stable Diffusion</option>
+                                        <option value="midjourney">Midjourney</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">图像尺寸</label>
+                                    <select class="config-input">
+                                        <option value="1024*1024">1024×1024</option>
+                                        <option value="1920*1080">1920×1080</option>
+                                        <option value="768*768">768×768</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">生成步数</label>
+                                    <input type="number" class="config-input" value="20" min="10" max="50">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">引导强度</label>
+                                    <input type="number" class="config-input" value="7.5" min="1" max="20" step="0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-actions">
+                            <button class="btn btn-primary">保存配置</button>
+                            <button class="btn btn-outline">重置配置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 语音合成服务 -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-info">
+                            <div class="service-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <div class="service-details">
+                                <h3>语音合成服务</h3>
+                                <p>百度TTS + 科大讯飞</p>
+                            </div>
+                        </div>
+                        <div class="service-status">
+                            <span class="status-indicator status-warning">响应较慢</span>
+                            <button class="btn-text" onclick="testService('audio')">
+                                <i class="fas fa-play"></i>
+                                测试
+                            </button>
+                        </div>
+                    </div>
+                    <div class="service-body">
+                        <div class="config-section">
+                            <div class="section-title">语音配置</div>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">默认音色</label>
+                                    <select class="config-input">
+                                        <option value="child">儿童音色</option>
+                                        <option value="adult">成人音色</option>
+                                        <option value="elder">老人音色</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">语速</label>
+                                    <input type="range" class="config-input" value="5" min="1" max="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-actions">
+                            <button class="btn btn-primary">保存配置</button>
+                            <button class="btn btn-outline">重置配置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 侧边栏 -->
+            <div class="config-sidebar">
+                <!-- 测试面板 -->
+                <div class="test-panel">
+                    <div class="test-header">
+                        <div class="test-title">
+                            <i class="fas fa-flask"></i>
+                            快速测试
+                        </div>
+                    </div>
+                    <div class="test-body">
+                        <textarea class="test-input" placeholder="输入测试内容...">写一个关于小兔子的简短故事</textarea>
+                        <button class="btn btn-primary" onclick="runQuickTest()">
+                            <i class="fas fa-play"></i>
+                            开始测试
+                        </button>
+                        <div id="test-result" class="test-result" style="display: none;">
+                            测试结果将在这里显示...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实时监控 -->
+                <div class="monitor-panel">
+                    <div class="monitor-header">
+                        <div class="monitor-title">
+                            <i class="fas fa-chart-line"></i>
+                            实时监控
+                        </div>
+                    </div>
+                    <div class="monitor-body">
+                        <div class="monitor-item">
+                            <span class="monitor-label">当前调用量</span>
+                            <span class="monitor-value">23/分钟</span>
+                        </div>
+                        <div class="monitor-item">
+                            <span class="monitor-label">成功率</span>
+                            <span class="monitor-value" style="color: #52c41a;">98.5%</span>
+                        </div>
+                        <div class="monitor-item">
+                            <span class="monitor-label">平均响应时间</span>
+                            <span class="monitor-value">2.3秒</span>
+                        </div>
+                        <div class="monitor-item">
+                            <span class="monitor-label">错误数量</span>
+                            <span class="monitor-value" style="color: #ff4d4f;">2</span>
+                        </div>
+                        <div class="monitor-item">
+                            <span class="monitor-label">队列长度</span>
+                            <span class="monitor-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作日志 -->
+                <div class="log-panel">
+                    <div class="log-header">
+                        <div class="log-title">
+                            <i class="fas fa-list"></i>
+                            操作日志
+                        </div>
+                        <button class="btn-text">
+                            <i class="fas fa-refresh"></i>
+                        </button>
+                    </div>
+                    <div class="log-body">
+                        <div class="log-item">
+                            <div class="log-time">14:30</div>
+                            <div class="log-level success">SUCCESS</div>
+                            <div class="log-message">文本生成测试成功</div>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-time">14:28</div>
+                            <div class="log-level info">INFO</div>
+                            <div class="log-message">更新GLM-4模型参数</div>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-time">14:25</div>
+                            <div class="log-level warning">WARNING</div>
+                            <div class="log-message">语音服务响应超时</div>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-time">14:20</div>
+                            <div class="log-level success">SUCCESS</div>
+                            <div class="log-message">保存配置成功</div>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-time">14:15</div>
+                            <div class="log-level error">ERROR</div>
+                            <div class="log-message">API密钥验证失败</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 导航跳转函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // 测试服务功能
+        function testService(serviceType) {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner loading"></i> 测试中...';
+            button.disabled = true;
+            
+            // 模拟API调用
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // 添加测试日志
+                addLog('SUCCESS', `${getServiceName(serviceType)}测试成功`);
+                
+                // 显示测试结果
+                showTestResult(serviceType);
+            }, 2000);
+        }
+
+        function getServiceName(serviceType) {
+            const names = {
+                'text': '文本生成服务',
+                'image': '图像生成服务',
+                'audio': '语音合成服务'
+            };
+            return names[serviceType] || '未知服务';
+        }
+
+        function showTestResult(serviceType) {
+            const results = {
+                'text': '响应时间: 2.1秒\n状态: 正常\n生成内容: "从前有一只小兔子..."',
+                'image': '响应时间: 8.5秒\n状态: 正常\n图像尺寸: 1024x1024',
+                'audio': '响应时间: 15.2秒\n状态: 响应较慢\n音频时长: 2.3秒'
+            };
+            
+            alert(`${getServiceName(serviceType)}测试结果:\n\n${results[serviceType]}`);
+        }
+
+        // 快速测试功能
+        function runQuickTest() {
+            const testInput = document.querySelector('.test-input');
+            const testResult = document.getElementById('test-result');
+            const button = event.target;
+            
+            if (!testInput.value.trim()) {
+                alert('请输入测试内容');
+                return;
+            }
+            
+            button.innerHTML = '<i class="fas fa-spinner loading"></i> 测试中...';
+            button.disabled = true;
+            
+            // 显示测试结果区域
+            testResult.style.display = 'block';
+            testResult.className = 'test-result';
+            testResult.textContent = '正在测试，请稍候...';
+            
+            // 模拟测试过程
+            setTimeout(() => {
+                testResult.className = 'test-result test-success';
+                testResult.innerHTML = `
+                    <div style="margin-bottom: 8px;"><strong>测试成功</strong></div>
+                    <div style="margin-bottom: 4px;">响应时间: 2.1秒</div>
+                    <div style="margin-bottom: 4px;">状态码: 200</div>
+                    <div style="margin-bottom: 4px;">生成内容:</div>
+                    <div style="margin-left: 16px; color: #52c41a;">"从前有一只小兔子叫贝贝，它住在一片美丽的森林里..."</div>
+                `;
+                
+                button.innerHTML = '<i class="fas fa-play"></i> 开始测试';
+                button.disabled = false;
+                
+                addLog('SUCCESS', '快速测试完成');
+            }, 3000);
+        }
+
+        // 添加日志
+        function addLog(level, message) {
+            const logBody = document.querySelector('.log-body');
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0');
+            
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item fade-in';
+            logItem.innerHTML = `
+                <div class="log-time">${time}</div>
+                <div class="log-level ${level.toLowerCase()}">${level}</div>
+                <div class="log-message">${message}</div>
+            `;
+            
+            logBody.insertBefore(logItem, logBody.firstChild);
+            
+            // 限制日志数量
+            const logItems = logBody.querySelectorAll('.log-item');
+            if (logItems.length > 10) {
+                logBody.removeChild(logItems[logItems.length - 1]);
+            }
+        }
+
+        // 实时更新监控数据
+        function updateMonitorData() {
+            const monitorValues = document.querySelectorAll('.monitor-value');
+            
+            // 模拟数据更新
+            setInterval(() => {
+                if (monitorValues.length > 0) {
+                    // 随机更新调用量
+                    const callsPerMinute = Math.floor(Math.random() * 50) + 15;
+                    monitorValues[0].textContent = callsPerMinute + '/分钟';
+                    
+                    // 随机更新响应时间
+                    const responseTime = (Math.random() * 2 + 1.5).toFixed(1);
+                    monitorValues[2].textContent = responseTime + '秒';
+                }
+            }, 5000);
+        }
+
+        // 配置保存功能
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            if (btn.textContent.includes('保存配置')) {
+                btn.addEventListener('click', () => {
+                    btn.innerHTML = '<i class="fas fa-spinner loading"></i> 保存中...';
+                    btn.disabled = true;
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-save"></i> 保存配置';
+                        btn.disabled = false;
+                        
+                        addLog('SUCCESS', '配置保存成功');
+                        
+                        // 显示成功提示
+                        const toast = document.createElement('div');
+                        toast.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: #52c41a;
+                            color: white;
+                            padding: 12px 20px;
+                            border-radius: 6px;
+                            z-index: 2000;
+                            animation: fadeIn 0.3s ease;
+                        `;
+                        toast.textContent = '配置保存成功';
+                        document.body.appendChild(toast);
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(toast);
+                        }, 3000);
+                    }, 1500);
+                });
+            }
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('技术配置页面加载完成');
+            updateMonitorData();
+            
+            // 初始化配置输入框的实时验证
+            document.querySelectorAll('.config-input').forEach(input => {
+                input.addEventListener('blur', () => {
+                    if (input.type === 'url' && input.value && !isValidUrl(input.value)) {
+                        input.style.borderColor = '#ff4d4f';
+                        addLog('WARNING', 'URL格式验证失败');
+                    } else {
+                        input.style.borderColor = '#d9d9d9';
+                    }
+                });
+            });
+        });
+
+        // URL验证函数
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // 响应式侧边栏
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        }
+    </script>
+</body>
+</html> 

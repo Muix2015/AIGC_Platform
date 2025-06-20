@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>故事大纲生成 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 粒子背景动画 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00E5FF;
+            border-radius: 50%;
+            animation: float 25s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* 容器布局 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+
+        .progress-bar {
+            flex: 1;
+            margin: 0 32px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-fill {
+            width: 37.5%;
+            height: 100%;
+            background: linear-gradient(90deg, #00A8FF, #00E5FF);
+            border-radius: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .step-info {
+            font-size: 14px;
+            color: #90A4AE;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* 左侧大纲展示区 */
+        .outline-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00A8FF, #FFC107);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-indicator {
+            margin-right: 10px;
+            background: linear-gradient(135deg, #7C4DFF, #00A8FF);
+            border-radius: 12px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #fff !important;
+            font-weight: 600;
+            animation: glow 2s infinite alternate;
+            -webkit-text-fill-color: #fff !important;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(124, 77, 255, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(124, 77, 255, 0.8); }
+        }
+
+        .regenerate-btn {
+            background: linear-gradient(135deg, #00A8FF, #0078D4);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .regenerate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+        }
+
+        /* 时间线大纲 */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #00A8FF, #7C4DFF, #FFC107);
+            border-radius: 1px;
+        }
+
+        .chapter {
+            position: relative;
+            margin-bottom: 32px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chapter:hover {
+            transform: translateX(5px);
+            border-color: #00E5FF;
+            box-shadow: 0 5px 20px rgba(0, 229, 255, 0.2);
+        }
+
+        .chapter::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 24px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #00A8FF;
+            background: #ffffff;
+        }
+
+        .chapter.beginning::before { background: #00A8FF; }
+        .chapter.development::before { background: #7C4DFF; }
+        .chapter.climax::before { background: #FF5722; }
+        .chapter.ending::before { background: #FFC107; }
+
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00E5FF;
+        }
+
+        .chapter-type {
+            background: rgba(124, 77, 255, 0.3);
+            border: 1px solid rgba(124, 77, 255, 0.5);
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #90A4AE;
+        }
+
+        .chapter-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .chapter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #FFC107;
+        }
+
+        .security-tag {
+            background: rgba(0, 230, 118, 0.2);
+            border: 1px solid rgba(0, 230, 118, 0.4);
+            color: #00E676;
+        }
+
+        /* 右侧编辑控制区 */
+        .control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #00E5FF;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* AI助手面板 */
+        .ai-assistant {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .ai-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #7C4DFF, #00A8FF);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 12px;
+            animation: bounce 3s infinite;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(124, 77, 255, 0.4);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        .ai-message {
+            background: rgba(124, 77, 255, 0.1);
+            border: 1px solid rgba(124, 77, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .suggestion-btn {
+            background: rgba(0, 168, 255, 0.1);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #00A8FF;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(0, 168, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        /* 编辑面板 */
+        .edit-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #00A8FF, #0078D4);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+        }
+
+        .control-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, #FF5252, #D32F2F);
+        }
+
+        /* 故事统计面板 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFC107;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #90A4AE;
+            margin-top: 4px;
+        }
+
+        /* 网络安全教育面板 */
+        .security-panel {
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.1), rgba(0, 230, 118, 0.05));
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .security-tip {
+            background: rgba(0, 230, 118, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            gap: 8px;
+        }
+
+        .security-icon {
+            color: #00E676;
+            font-size: 16px;
+        }
+
+        /* 底部操作区 */
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(79, 195, 247, 0.2);
+            padding: 16px;
+            z-index: 100;
+        }
+
+        .action-buttons {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary, .btn-primary {
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .btn-secondary:hover, .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.4);
+        }
+
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 800px;
+            width: 95%;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #00E5FF;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: #ffffff;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+
+            .control-section {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .progress-bar {
+                margin: 0;
+                order: -1;
+            }
+
+            .section-title {
+                font-size: 20px;
+            }
+
+            .timeline {
+                padding-left: 30px;
+            }
+
+            .timeline::before {
+                left: 15px;
+            }
+
+            .chapter::before {
+                left: -25px;
+            }
+
+            .bottom-actions {
+                padding: 12px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .btn-group {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00E5FF;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 编辑模式样式 */
+        .editing {
+            border-color: #00E5FF !important;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3) !important;
+        }
+
+        .edit-textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 200px;
+            height: 300px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .edit-textarea:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .edit-textarea::placeholder {
+            color: #90A4AE;
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景 -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="logo">🌟 AI创意工场</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="step-info">步骤 3/8: 故事大纲生成</div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="main-content">
+            <!-- 左侧大纲展示区 -->
+            <section class="outline-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        📖 智能故事大纲
+                        <span class="ai-indicator">AI生成</span>
+                    </h1>
+                    <button class="regenerate-btn" onclick="regenerateOutline()">
+                        🔄 重新生成
+                    </button>
+                </div>
+
+                <div class="timeline" id="timeline">
+                    <div class="chapter beginning" onclick="editChapter(this, 0)">
+                        <div class="chapter-header">
+                            <h3 class="chapter-title">第一章：意外的发现</h3>
+                            <span class="chapter-type">开端</span>
+                        </div>
+                        <div class="chapter-content">
+                            小女孩艾莉在家里的旧电脑上发现了一个神秘的程序。当她好奇地点击时，屏幕突然闪烁起奇异的光芒，出现了一个自称是"网络守护者"的AI助手。AI告诉她，网络世界正面临着病毒的威胁，需要她的帮助。
+                        </div>
+                        <div class="chapter-tags">
+                            <span class="tag">好奇心</span>
+                            <span class="tag">神秘元素</span>
+                            <span class="security-tag">网络安全意识</span>
+                        </div>
+                    </div>
+
+                    <div class="chapter development" onclick="editChapter(this, 1)">
+                        <div class="chapter-header">
+                            <h3 class="chapter-title">第二章：进入网络世界</h3>
+                            <span class="chapter-type">发展</span>
+                        </div>
+                        <div class="chapter-content">
+                            艾莉被传送到了一个由数据和代码构成的奇妙世界。在这里，她遇到了各种数字生物，了解到病毒正在破坏网络的平衡。AI助手教会她识别可疑链接和保护个人信息的重要性，并赋予她"安全密码"的力量。
+                        </div>
+                        <div class="chapter-tags">
+                            <span class="tag">世界构建</span>
+                            <span class="tag">角色成长</span>
+                            <span class="security-tag">密码安全</span>
+                            <span class="security-tag">个人信息保护</span>
+                        </div>
+                    </div>
+
+                    <div class="chapter development" onclick="editChapter(this, 2)">
+                        <div class="chapter-header">
+                            <h3 class="chapter-title">第三章：病毒的阴谋</h3>
+                            <span class="chapter-type">发展</span>
+                        </div>
+                        <div class="chapter-content">
+                            艾莉发现病毒军团正在网络中散布虚假信息，试图窃取用户的个人数据。她学会了如何识别网络钓鱼、验证信息真实性，并与其他网络英雄联手，准备对抗病毒的威胁。
+                        </div>
+                        <div class="chapter-tags">
+                            <span class="tag">冲突升级</span>
+                            <span class="tag">团队合作</span>
+                            <span class="security-tag">网络钓鱼防护</span>
+                            <span class="security-tag">信息辨别</span>
+                        </div>
+                    </div>
+
+                    <div class="chapter climax" onclick="editChapter(this, 3)">
+                        <div class="chapter-header">
+                            <h3 class="chapter-title">第四章：最终对决</h3>
+                            <span class="chapter-type">高潮</span>
+                        </div>
+                        <div class="chapter-content">
+                            病毒头目发动最后的攻击，试图控制整个网络世界。艾莉运用所学的网络安全知识，与伙伴们携手创建了强大的防火墙。在激烈的战斗中，她用智慧和勇气，最终战胜了病毒，恢复了网络世界的和平。
+                        </div>
+                        <div class="chapter-tags">
+                            <span class="tag">高潮对决</span>
+                            <span class="tag">智慧胜利</span>
+                            <span class="security-tag">防火墙</span>
+                            <span class="security-tag">网络防护</span>
+                        </div>
+                    </div>
+
+                    <div class="chapter ending" onclick="editChapter(this, 4)">
+                        <div class="chapter-header">
+                            <h3 class="chapter-title">第五章：网络守护者</h3>
+                            <span class="chapter-type">结局</span>
+                        </div>
+                        <div class="chapter-content">
+                            回到现实世界的艾莉成为了真正的网络安全小卫士。她将所学的知识分享给同学们，教大家如何安全地使用互联网。AI助手承诺会继续在网络世界守护大家的安全，而艾莉也明白了网络安全的重要性。
+                        </div>
+                        <div class="chapter-tags">
+                            <span class="tag">成长完成</span>
+                            <span class="tag">知识传播</span>
+                            <span class="security-tag">安全意识</span>
+                            <span class="security-tag">责任感</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧编辑控制区 -->
+            <aside class="control-section">
+                <!-- AI助手面板 -->
+                <div class="control-panel">
+                    <h3 class="panel-title">🤖 AI创作助手</h3>
+                    <div class="ai-assistant">
+                        <div class="ai-avatar" onclick="showAITip()">🤖</div>
+                        <div class="ai-message" id="aiMessage">
+                            这个故事很棒！我为你巧妙地融入了网络安全教育元素。点击任意章节可以编辑内容，我会提供更多建议！
+                        </div>
+                    </div>
+                    <div class="ai-suggestions">
+                        <button class="suggestion-btn" onclick="applySuggestion('emotion')">💝 增加情感深度</button>
+                        <button class="suggestion-btn" onclick="applySuggestion('security')">🛡️ 强化安全教育</button>
+                        <button class="suggestion-btn" onclick="applySuggestion('character')">👥 丰富角色描述</button>
+                        <button class="suggestion-btn" onclick="applySuggestion('scene')">🎬 增加场景细节</button>
+                    </div>
+                </div>
+
+                <!-- 编辑控制面板 */
+                <div class="control-panel">
+                    <h3 class="panel-title">✏️ 编辑工具</h3>
+                    <div class="edit-controls">
+                        <button class="control-btn" onclick="addChapter()">
+                            ➕ 添加章节
+                        </button>
+                        <button class="control-btn secondary" onclick="reorderChapters()">
+                            🔀 调整顺序
+                        </button>
+                        <button class="control-btn secondary" onclick="exportOutline()">
+                            📄 导出大纲
+                        </button>
+                        <button class="control-btn danger" onclick="resetOutline()">
+                            🗑️ 重置大纲
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 故事统计面板 -->
+                <div class="control-panel">
+                    <h3 class="panel-title">📊 故事统计</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value">5</span>
+                            <span class="stat-label">章节数量</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">3-5</span>
+                            <span class="stat-label">预计时长(分钟)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">8</span>
+                            <span class="stat-label">安全知识点</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">85%</span>
+                            <span class="stat-label">教育价值</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 网络安全教育面板 -->
+                <div class="control-panel security-panel">
+                    <h3 class="panel-title">🛡️ 安全教育要点</h3>
+                    <div class="security-tip">
+                        <span class="security-icon">🎯</span>
+                        <div>
+                            本故事包含了密码安全、个人信息保护、网络钓鱼识别等8个核心安全知识点，帮助小朋友建立良好的网络安全习惯。
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- 底部操作区 -->
+    <div class="bottom-actions">
+        <div class="action-buttons">
+            <div class="btn-group">
+                <button class="btn-secondary" onclick="goBack()">← 重新构思</button>
+                <button class="btn-secondary" onclick="saveOutline()">💾 保存大纲</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="confirmOutline()">
+                    确认大纲，生成剧本 →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3 class="modal-title">编辑章节</h3>
+            <textarea class="edit-textarea" id="editTextarea" placeholder="编辑章节内容..."></textarea>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn-primary" onclick="saveChapterEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEditingChapter = null;
+        let currentEditingIndex = -1;
+
+        // 粒子背景动画
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 60;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 25 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 20) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 编辑章节
+        function editChapter(chapterElement, index) {
+            currentEditingChapter = chapterElement;
+            currentEditingIndex = index;
+            
+            const content = chapterElement.querySelector('.chapter-content').textContent.trim();
+            document.getElementById('editTextarea').value = content;
+            document.getElementById('editModal').style.display = 'flex';
+            
+            // 高亮正在编辑的章节
+            document.querySelectorAll('.chapter').forEach(ch => ch.classList.remove('editing'));
+            chapterElement.classList.add('editing');
+        }
+
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.querySelectorAll('.chapter').forEach(ch => ch.classList.remove('editing'));
+            currentEditingChapter = null;
+            currentEditingIndex = -1;
+        }
+
+        // 保存章节编辑
+        function saveChapterEdit() {
+            if (currentEditingChapter) {
+                const newContent = document.getElementById('editTextarea').value.trim();
+                if (newContent) {
+                    currentEditingChapter.querySelector('.chapter-content').textContent = newContent;
+                    updateAIMessage('章节内容已更新！我注意到你的修改很棒，保持了故事的连贯性。');
+                }
+            }
+            closeEditModal();
+        }
+
+        // 重新生成大纲
+        function regenerateOutline() {
+            if (confirm('确定要重新生成大纲吗？当前的修改将会丢失。')) {
+                const regenerateBtn = document.querySelector('.regenerate-btn');
+                regenerateBtn.innerHTML = '<div class="loading"></div> 生成中...';
+                regenerateBtn.disabled = true;
+                
+                // 模拟AI重新生成
+                setTimeout(() => {
+                    // 这里可以添加新的大纲生成逻辑
+                    updateAIMessage('大纲已重新生成！我保持了核心的网络安全教育主题，但调整了一些细节让故事更精彩。');
+                    regenerateBtn.innerHTML = '🔄 重新生成';
+                    regenerateBtn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        // 应用AI建议
+        function applySuggestion(type) {
+            const suggestions = {
+                emotion: '我会为每个章节增加更多情感描述，让角色更有血有肉，让读者更容易产生共鸣。',
+                security: '我会在现有基础上增加更多网络安全知识点，比如社交工程、软件更新等重要概念。',
+                character: '我会丰富主角和配角的性格特点，给他们独特的背景故事和成长轨迹。',
+                scene: '我会为每个场景添加更多视觉细节，让网络世界更加生动有趣。'
+            };
+            
+            updateAIMessage(suggestions[type] || '好的建议！我会帮你优化故事内容。');
+            
+            // 模拟应用建议的效果
+            document.querySelectorAll('.chapter').forEach(chapter => {
+                chapter.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    chapter.style.transform = 'scale(1)';
+                }, 300);
+            });
+        }
+
+        // 更新AI消息
+        function updateAIMessage(message) {
+            const aiMessage = document.getElementById('aiMessage');
+            aiMessage.style.opacity = '0';
+            setTimeout(() => {
+                aiMessage.textContent = message;
+                aiMessage.style.opacity = '1';
+            }, 150);
+        }
+
+        // 显示AI提示
+        function showAITip() {
+            const tips = [
+                '💡 点击任意章节都可以编辑内容哦！',
+                '🌟 这个故事的网络安全教育元素设计得很棒！',
+                '🎨 可以尝试调整章节顺序来优化故事节奏！',
+                '🔮 我可以帮你增加更多有趣的情节！'
+            ];
+            
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            updateAIMessage(randomTip);
+        }
+
+        // 添加章节
+        function addChapter() {
+            const newChapterHTML = `
+                <div class="chapter development" onclick="editChapter(this, 5)">
+                    <div class="chapter-header">
+                        <h3 class="chapter-title">新章节：点击编辑标题</h3>
+                        <span class="chapter-type">发展</span>
+                    </div>
+                    <div class="chapter-content">
+                        点击编辑这个章节的内容...
+                    </div>
+                    <div class="chapter-tags">
+                        <span class="tag">新章节</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('timeline').insertAdjacentHTML('beforeend', newChapterHTML);
+            updateAIMessage('新章节已添加！记得为它编写精彩的内容。');
+            
+            // 更新统计
+            const chapterCount = document.querySelector('.stat-value');
+            chapterCount.textContent = parseInt(chapterCount.textContent) + 1;
+        }
+
+        // 调整章节顺序
+        function reorderChapters() {
+            updateAIMessage('你可以拖拽章节来调整顺序，或者通过编辑来重新组织故事结构。');
+        }
+
+        // 导出大纲
+        function exportOutline() {
+            const chapters = document.querySelectorAll('.chapter');
+            let outlineText = '故事大纲\n\n';
+            
+            chapters.forEach((chapter, index) => {
+                const title = chapter.querySelector('.chapter-title').textContent;
+                const content = chapter.querySelector('.chapter-content').textContent;
+                outlineText += `${index + 1}. ${title}\n${content}\n\n`;
+            });
+            
+            const blob = new Blob([outlineText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '故事大纲.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            updateAIMessage('大纲已导出！你可以保存到本地或分享给其他人。');
+        }
+
+        // 重置大纲
+        function resetOutline() {
+            if (confirm('确定要重置大纲吗？所有修改都将丢失。')) {
+                location.reload();
+            }
+        }
+
+        // 保存大纲
+        function saveOutline() {
+            // 模拟保存到云端
+            const saveBtn = document.querySelector('.btn-secondary[onclick="saveOutline()"]');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '<div class="loading"></div> 保存中...';
+            saveBtn.disabled = true;
+            
+            setTimeout(() => {
+                saveBtn.textContent = '✅ 已保存';
+                updateAIMessage('大纲已保存到云端！可以随时回来继续编辑。');
+                
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        // 返回上一页
+        function goBack() {
+            if (confirm('确定要返回重新构思吗？当前的大纲修改将会丢失。')) {
+                window.history.back();
+            }
+        }
+
+        // 确认大纲
+        function confirmOutline() {
+            updateAIMessage('太棒了！接下来我将基于这个大纲为你生成详细的剧本和分镜头脚本。');
+            
+            // 保存大纲数据
+            const outlineData = {
+                chapters: Array.from(document.querySelectorAll('.chapter')).map(chapter => ({
+                    title: chapter.querySelector('.chapter-title').textContent,
+                    content: chapter.querySelector('.chapter-content').textContent,
+                    type: chapter.querySelector('.chapter-type').textContent
+                }))
+            };
+            localStorage.setItem('storyOutline', JSON.stringify(outlineData));
+            
+            // 跳转到下一步
+            setTimeout(() => {
+                window.location.href = 'script-generation.html';
+            }, 1500);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // 如果有保存的创意，显示相关信息
+            const savedIdea = localStorage.getItem('storyIdea');
+            if (savedIdea) {
+                updateAIMessage(`基于你的创意"${savedIdea.substring(0, 50)}..."，我生成了这个精彩的故事大纲！`);
+            }
+            
+            // 添加滚动动画
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateX(0)';
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.chapter').forEach(chapter => {
+                chapter.style.opacity = '0';
+                chapter.style.transform = 'translateX(-20px)';
+                chapter.style.transition = 'all 0.5s ease';
+                observer.observe(chapter);
+            });
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        saveOutline();
+                        break;
+                    case 'Enter':
+                        if (document.getElementById('editModal').style.display === 'flex') {
+                            event.preventDefault();
+                            saveChapterEdit();
+                        }
+                        break;
+                }
+            }
+            
+            if (event.key === 'Escape') {
+                if (document.getElementById('editModal').style.display === 'flex') {
+                    closeEditModal();
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

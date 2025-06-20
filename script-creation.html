@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧本创作 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 32px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #00E5FF;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: #00E5FF;
+            transform: translateX(-3px);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+
+        .save-status {
+            font-size: 14px;
+            color: #4CAF50;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tool-button {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(124, 77, 255, 0.4);
+        }
+
+        .tool-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 24px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .story-info {
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #B0BEC5;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            accent-color: #00A8FF;
+        }
+
+        /* 角色列表 */
+        .character-list {
+            margin-bottom: 24px;
+        }
+
+        .character-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .character-name {
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 4px;
+        }
+
+        .character-details {
+            font-size: 12px;
+            color: #90A4AE;
+            line-height: 1.4;
+        }
+
+        /* 场景列表 */
+        .scene-list {
+            list-style: none;
+        }
+
+        .scene-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scene-item:hover {
+            background: rgba(0, 168, 255, 0.1);
+        }
+
+        .scene-item.active {
+            background: rgba(0, 168, 255, 0.2);
+            border-left: 3px solid #00A8FF;
+        }
+
+        .scene-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4CAF50;
+        }
+
+        .scene-indicator.empty {
+            background: #90A4AE;
+        }
+
+        /* 编辑器区域 */
+        .editor-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            height: fit-content;
+            min-height: 600px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+        }
+
+        .scene-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00E5FF;
+        }
+
+        .editor-tools {
+            display: flex;
+            gap: 8px;
+        }
+
+        .editor-content {
+            min-height: 500px;
+        }
+
+        .script-editor {
+            width: 100%;
+            min-height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .script-editor:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        /* 动作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .toolbar {
+                padding: 12px;
+            }
+
+            .tool-button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .editor-container {
+                padding: 16px;
+            }
+
+            .script-editor {
+                min-height: 400px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <a href="free-creation.html" class="back-button">
+                <span>←</span>
+                <span>返回类型选择</span>
+            </a>
+            <h1 class="page-title">📝 剧本创作</h1>
+            <div class="save-status">✅ 已自动保存</div>
+        </header>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <button class="tool-button" onclick="insertTemplate('character')">添加角色</button>
+            <button class="tool-button" onclick="insertTemplate('dialogue')">插入对话</button>
+            <button class="tool-button" onclick="insertTemplate('action')">添加动作</button>
+            <button class="tool-button" onclick="insertTemplate('scene')">新建场景</button>
+            <button class="tool-button secondary" onclick="previewScript()">预览剧本</button>
+            <button class="tool-button secondary" onclick="exportScript()">导出文档</button>
+            <button class="tool-button secondary" onclick="shareScript()">分享作品</button>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 左侧边栏 - 故事信息 -->
+            <div class="sidebar">
+                <div class="story-info">
+                    <h3 class="sidebar-title">
+                        <span>📖</span>
+                        <span>故事信息</span>
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">剧本标题</label>
+                        <input type="text" class="form-input" value="奇幻冒险之旅" placeholder="请输入剧本标题">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">故事类型</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox"> 童话
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked> 奇幻
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox"> 科幻
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox"> 现实
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">故事长度</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="length" value="short"> 短篇
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="length" value="medium" checked> 中篇
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="length" value="long"> 长篇
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="character-list">
+                    <h3 class="sidebar-title">
+                        <span>👥</span>
+                        <span>角色设定</span>
+                    </h3>
+                    
+                    <div class="character-item">
+                        <div class="character-name">小红</div>
+                        <div class="character-details">
+                            年龄：10岁<br>
+                            性格：勇敢好奇<br>
+                            特点：富有正义感
+                        </div>
+                    </div>
+                    
+                    <div class="character-item">
+                        <div class="character-name">奇奇</div>
+                        <div class="character-details">
+                            种族：魔法狐狸<br>
+                            性格：机智谨慎<br>
+                            能力：预知危险
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中间区域 - 剧本编辑器 -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <h2 class="scene-title">场景一：魔法森林</h2>
+                    <div class="editor-tools">
+                        <button class="tool-button" onclick="formatText()">格式化</button>
+                        <button class="tool-button" onclick="aiAssist()">AI辅助</button>
+                    </div>
+                </div>
+
+                <div class="editor-content">
+                    <textarea class="script-editor" placeholder="在这里编写你的剧本...
+
+场景一：魔法森林
+
+[环境描述]
+阳光透过茂密的树叶洒下金色光芒，古老的魔法门闪着微光...
+
+小红：(好奇地走向门) "这扇门怎么会在这里？"
+
+奇奇：(从树丛中跳出) "小心，这里很危险..."
+
+[动作描述]
+小红惊讶地转身，看到了一只会说话的小狐狸...">场景一：魔法森林
+
+[环境描述]
+阳光透过茂密的树叶洒下金色光芒，古老的魔法门闪着微光...
+
+小红：(好奇地走向门) "这扇门怎么会在这里？"
+
+奇奇：(从树丛中跳出) "小心，这里很危险..."
+
+[动作描述]
+小红惊讶地转身，看到了一只会说话的小狐狸...</textarea>
+                </div>
+            </div>
+
+            <!-- 右侧边栏 - 场景列表 -->
+            <div class="sidebar">
+                <h3 class="sidebar-title">
+                    <span>🎬</span>
+                    <span>场景列表</span>
+                </h3>
+                
+                <ul class="scene-list">
+                    <li class="scene-item active">
+                        <span class="scene-indicator"></span>
+                        <span>场景一：魔法森林</span>
+                    </li>
+                    <li class="scene-item">
+                        <span class="scene-indicator empty"></span>
+                        <span>场景二：神秘洞穴</span>
+                    </li>
+                    <li class="scene-item">
+                        <span class="scene-indicator empty"></span>
+                        <span>场景三：水晶宫殿</span>
+                    </li>
+                    <li class="scene-item">
+                        <span class="scene-indicator empty"></span>
+                        <span>场景四：最终对决</span>
+                    </li>
+                </ul>
+
+                <div style="margin-top: 20px;">
+                    <button class="tool-button" onclick="addScene()">添加场景</button>
+                    <button class="tool-button secondary" onclick="reorderScenes()">重排顺序</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部动作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="saveAsDraft()">保存草稿</button>
+            <button class="btn btn-primary" onclick="completeScript()">完成创作</button>
+            <button class="btn btn-secondary" onclick="previewEffect()">预览效果</button>
+        </div>
+    </div>
+
+    <script>
+        // 插入模板
+        function insertTemplate(type) {
+            const editor = document.querySelector('.script-editor');
+            const cursor = editor.selectionStart;
+            let template = '';
+            
+            switch(type) {
+                case 'character':
+                    template = '\n角色名：(动作描述) "对话内容"\n';
+                    break;
+                case 'dialogue':
+                    template = '\n角色名：(表情/动作) "对话内容"\n';
+                    break;
+                case 'action':
+                    template = '\n[动作描述]\n角色的具体动作...\n';
+                    break;
+                case 'scene':
+                    template = '\n\n场景X：场景名称\n\n[环境描述]\n场景的环境和氛围描述...\n\n';
+                    break;
+            }
+            
+            editor.value = editor.value.slice(0, cursor) + template + editor.value.slice(cursor);
+            editor.focus();
+            editor.setSelectionRange(cursor + template.length, cursor + template.length);
+        }
+
+        // 格式化文本
+        function formatText() {
+            alert('正在格式化文本...');
+        }
+
+        // AI辅助
+        function aiAssist() {
+            alert('AI助手：建议添加更多细节描述，让角色对话更生动！');
+        }
+
+        // 预览剧本
+        function previewScript() {
+            const content = document.querySelector('.script-editor').value;
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                <head><title>剧本预览</title></head>
+                <body style="font-family: sans-serif; padding: 20px; line-height: 1.6;">
+                    <h1>剧本预览</h1>
+                    <pre style="white-space: pre-wrap;">${content}</pre>
+                </body>
+                </html>
+            `);
+        }
+
+        // 导出文档
+        function exportScript() {
+            const content = document.querySelector('.script-editor').value;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '我的剧本.txt';
+            link.click();
+        }
+
+        // 分享作品
+        function shareScript() {
+            alert('分享功能开发中...');
+        }
+
+        // 添加场景
+        function addScene() {
+            const sceneList = document.querySelector('.scene-list');
+            const sceneCount = sceneList.children.length + 1;
+            const newScene = document.createElement('li');
+            newScene.className = 'scene-item';
+            newScene.innerHTML = `
+                <span class="scene-indicator empty"></span>
+                <span>场景${sceneCount}：新场景</span>
+            `;
+            sceneList.appendChild(newScene);
+        }
+
+        // 重排顺序
+        function reorderScenes() {
+            alert('场景重排功能开发中...');
+        }
+
+        // 保存草稿
+        function saveAsDraft() {
+            alert('草稿已保存！');
+        }
+
+        // 完成创作
+        function completeScript() {
+            alert('恭喜！剧本创作完成！');
+        }
+
+        // 预览效果
+        function previewEffect() {
+            alert('效果预览功能开发中...');
+        }
+
+        // 场景切换
+        document.querySelectorAll('.scene-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.scene-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector('.scene-title').textContent = this.textContent.trim();
+            });
+        });
+
+        // 自动保存
+        let saveTimer;
+        document.querySelector('.script-editor').addEventListener('input', function() {
+            clearTimeout(saveTimer);
+            document.querySelector('.save-status').textContent = '📝 正在编辑...';
+            saveTimer = setTimeout(() => {
+                document.querySelector('.save-status').textContent = '✅ 已自动保存';
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

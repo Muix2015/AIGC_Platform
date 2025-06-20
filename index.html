@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意动画平台 - 原型预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 32px;
+        }
+
+        /* 用户流程示意图 */
+        .user-flow {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .flow-title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 32px;
+            color: #333;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .flow-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .flow-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1890ff;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .flow-step {
+            background: #f0f9ff;
+            border: 2px solid #1890ff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #1890ff;
+            white-space: nowrap;
+        }
+
+        .flow-arrow {
+            font-size: 20px;
+            color: #1890ff;
+            margin: 0 8px;
+        }
+
+        .flow-separator {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #1890ff 50%, transparent 100%);
+            margin: 16px 0;
+        }
+
+        /* 页面网格 */
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .page-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .page-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .page-type {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .page-iframe-container {
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .page-iframe {
+            width: 200%;
+            height: 1000px;
+            border: none;
+            transform: scale(0.5);
+            transform-origin: top left;
+            pointer-events: none;
+        }
+
+        .page-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .page-overlay:hover {
+            opacity: 1;
+            background: rgba(24, 144, 255, 0.1);
+        }
+
+        .page-overlay .view-btn {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transform: translateY(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .page-overlay:hover .view-btn {
+            transform: translateY(0);
+        }
+
+        /* 统计信息 */
+        .stats {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .stats-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1890ff;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 管理端样式 */
+        .admin-page .page-header {
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 28px;
+            }
+            
+            .subtitle {
+                font-size: 16px;
+            }
+            
+            .pages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-iframe-container {
+                height: 400px;
+            }
+            
+            .page-iframe {
+                width: 200%;
+                height: 800px;
+            }
+            
+            .flow-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-item {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .page-item:nth-child(1) { animation-delay: 0.1s; }
+        .page-item:nth-child(2) { animation-delay: 0.2s; }
+        .page-item:nth-child(3) { animation-delay: 0.3s; }
+        .page-item:nth-child(4) { animation-delay: 0.4s; }
+        .page-item:nth-child(5) { animation-delay: 0.5s; }
+        .page-item:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部标题 -->
+        <div class="header">
+            <h1 class="title">AI创意动画体验平台</h1>
+            <p class="subtitle">高保真原型设计预览 - 完整用户体验展示</p>
+        </div>
+
+        <!-- 用户流程示意图 -->
+        <div class="user-flow">
+            <h2 class="flow-title">🎯 用户操作流程图</h2>
+            <div class="flow-diagram">
+                <!-- 用户端流程 -->
+                <div class="flow-section">
+                    <div class="flow-section-title">👨‍🎓 学生创作流程</div>
+                    <div class="flow-steps">
+                        <div class="flow-step">用户登录</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">创作大厅</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">选择创作模式</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">配置参数/选择创作类型</div>
+                    </div>
+                    <div class="flow-steps">
+                        <div class="flow-step">模板流程：故事大纲</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">剧本生成</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">关键帧设计</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">镜头运动</div>
+                    </div>
+                    <div class="flow-steps">
+                        <div class="flow-step">自由创作：剧本/图片/视频/声音</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">独立创作工具</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">AI智能辅助</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">实时预览</div>
+                    </div>
+                    <div class="flow-steps">
+                        <div class="flow-step">AI视频合成</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">配音配乐</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">作品预览</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">作品管理</div>
+                    </div>
+                </div>
+
+                <div class="flow-separator"></div>
+
+                <!-- 管理端流程 -->
+                <div class="flow-section">
+                    <div class="flow-section-title">🛠️ 管理员操作流程</div>
+                    <div class="flow-steps">
+                        <div class="flow-step">系统仪表板</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">内容管理</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">技术配置</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">系统监控</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-step">安全设置</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面预览网格 -->
+        <div class="pages-grid">
+            <!-- 用户端页面 -->
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">登录注册页面</div>
+                    <div class="page-type">用户端 - 身份认证</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="login.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('login.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">创作大厅</div>
+                    <div class="page-type">用户端 - 主页面</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="dashboard.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('dashboard.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">创作模式选择</div>
+                    <div class="page-type">用户端 - 创作流程</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="create-mode.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('create-mode.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">模板配置</div>
+                    <div class="page-type">用户端 - 参数设置</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="template-config.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('template-config.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">自由创作类型选择</div>
+                    <div class="page-type">用户端 - 创作类型选择</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="free-creation.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('free-creation.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">剧本创作</div>
+                    <div class="page-type">用户端 - 独立创作</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="script-creation.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('script-creation.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">图片创作</div>
+                    <div class="page-type">用户端 - 独立创作</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="image-creation.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('image-creation.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">视频创作</div>
+                    <div class="page-type">用户端 - 独立创作</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="video-creation.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('video-creation.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">声音合成</div>
+                    <div class="page-type">用户端 - 独立创作</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="audio-creation.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('audio-creation.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">故事大纲</div>
+                    <div class="page-type">用户端 - 内容生成</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="story-outline.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('story-outline.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">剧本生成</div>
+                    <div class="page-type">用户端 - 脚本编写</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="script-generation.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('script-generation.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">关键帧设计</div>
+                    <div class="page-type">用户端 - 视觉设计</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="keyframe-design.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('keyframe-design.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">镜头运动</div>
+                    <div class="page-type">用户端 - 动画设计</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="camera-movement.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('camera-movement.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">AI视频合成</div>
+                    <div class="page-type">用户端 - 视频生成</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="video-synthesis.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('video-synthesis.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">配音配乐</div>
+                    <div class="page-type">用户端 - 音频制作</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="audio-production.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('audio-production.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">作品预览</div>
+                    <div class="page-type">用户端 - 最终预览</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="work-preview.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('work-preview.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item">
+                <div class="page-header">
+                    <div class="page-title">作品管理</div>
+                    <div class="page-type">用户端 - 作品管理</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="work-management.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('work-management.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 管理端页面 -->
+            <div class="page-item admin-page">
+                <div class="page-header">
+                    <div class="page-title">系统仪表板</div>
+                    <div class="page-type">管理端 - 概览监控</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="admin-dashboard.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('admin-dashboard.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item admin-page">
+                <div class="page-header">
+                    <div class="page-title">内容管理</div>
+                    <div class="page-type">管理端 - 素材维护</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="content-management.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('content-management.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item admin-page">
+                <div class="page-header">
+                    <div class="page-title">技术配置</div>
+                    <div class="page-type">管理端 - API管理</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="tech-config.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('tech-config.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item admin-page">
+                <div class="page-header">
+                    <div class="page-title">系统监控</div>
+                    <div class="page-type">管理端 - 实时监控</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="system-monitor.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('system-monitor.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-item admin-page">
+                <div class="page-header">
+                    <div class="page-title">安全设置</div>
+                    <div class="page-type">管理端 - 安全管理</div>
+                </div>
+                <div class="page-iframe-container">
+                    <iframe src="security-settings.html" class="page-iframe"></iframe>
+                    <div class="page-overlay" onclick="openPage('security-settings.html')">
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 项目统计 -->
+        <div class="stats">
+            <h2 class="stats-title">📊 原型设计统计</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">22</div>
+                    <div class="stat-label">完成页面数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">17</div>
+                    <div class="stat-label">用户端页面</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">管理端页面</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">核心功能覆盖</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 打开页面详情
+        function openPage(url) {
+            window.open(url, '_blank');
+        }
+
+        // 页面加载动画
+        window.addEventListener('load', function() {
+            const items = document.querySelectorAll('.page-item');
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // 初始化页面样式
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.page-item');
+            items.forEach(item => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(30px)';
+                item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            });
+        });
+
+        // 添加页面统计信息
+        const totalPages = document.querySelectorAll('.page-item').length;
+        const userPages = document.querySelectorAll('.page-item:not(.admin-page)').length;
+        const adminPages = document.querySelectorAll('.admin-page').length;
+
+        console.log(`总页面数: ${totalPages}`);
+        console.log(`用户端页面: ${userPages}`);
+        console.log(`管理端页面: ${adminPages}`);
+    </script>
+</body>
+</html> 

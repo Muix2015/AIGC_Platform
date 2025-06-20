@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容管理 - AI创意动画管理后台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        /* 顶部导航栏 */
+        .top-header {
+            height: 64px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-btn, .user-menu {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .notification-btn:hover, .user-menu:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 侧边导航栏 */
+        .sidebar {
+            width: 240px;
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 64px;
+            border-right: 1px solid #e8e8e8;
+            overflow-y: auto;
+        }
+
+        .nav-menu {
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #1890ff;
+        }
+
+        .nav-icon {
+            width: 16px;
+            margin-right: 12px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: #8c8c8c;
+            font-size: 14px;
+        }
+
+        /* 标签页 */
+        .content-tabs {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tab-header {
+            display: flex;
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .tab-btn {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #8c8c8c;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #1890ff;
+            background: #fff;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1890ff;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 操作工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8c8c8c;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #1890ff;
+            border: 1px solid #1890ff;
+        }
+
+        .btn-outline:hover {
+            background: #e6f7ff;
+        }
+
+        /* 内容表格 */
+        .content-table {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .table th {
+            background: #fafafa;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-enabled {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .status-disabled {
+            background: #fff2e8;
+            color: #fa8c16;
+            border: 1px solid #ffbb96;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: #1890ff;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-text:hover {
+            background: #e6f7ff;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e8e8e8;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8c8c8c;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .modal-close:hover {
+            background: #f5f5f5;
+        }
+
+        .modal-body {
+            padding: 0 24px 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #262626;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 24px;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #262626;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+
+        .page-btn.active {
+            background: #1890ff;
+            color: #fff;
+            border-color: #1890ff;
+        }
+
+        .page-btn:disabled {
+            background: #f5f5f5;
+            color: #8c8c8c;
+            cursor: not-allowed;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .toolbar-left {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-header">
+        <div class="logo-section">
+            <div class="logo">AI</div>
+            <span class="system-title">AI创意动画管理后台</span>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="user-menu">
+                <i class="fas fa-user-circle"></i>
+                <span>管理员</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边导航栏 -->
+    <aside class="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item" onclick="navigateTo('admin-dashboard.html')">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                系统仪表板
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-folder-open nav-icon"></i>
+                内容管理
+            </div>
+            <div class="nav-item" onclick="navigateTo('tech-config.html')">
+                <i class="fas fa-cogs nav-icon"></i>
+                技术配置
+            </div>
+            <div class="nav-item" onclick="navigateTo('system-monitor.html')">
+                <i class="fas fa-chart-line nav-icon"></i>
+                系统监控
+            </div>
+            <div class="nav-item" onclick="navigateTo('security-settings.html')">
+                <i class="fas fa-shield-alt nav-icon"></i>
+                安全设置
+            </div>
+        </nav>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">内容管理</h1>
+            <p class="page-description">管理创作素材库，包括场景、角色、风格等内容素材的维护和配置</p>
+        </div>
+
+        <!-- 内容标签页 -->
+        <div class="content-tabs">
+            <div class="tab-header">
+                <button class="tab-btn active" data-tab="scenes">
+                    <i class="fas fa-mountain"></i>
+                    场景库管理
+                </button>
+                <button class="tab-btn" data-tab="characters">
+                    <i class="fas fa-user-friends"></i>
+                    角色库管理
+                </button>
+                <button class="tab-btn" data-tab="styles">
+                    <i class="fas fa-palette"></i>
+                    风格库管理
+                </button>
+            </div>
+
+            <!-- 场景库管理 -->
+            <div class="tab-content active" id="scenes">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="搜索场景名称或描述...">
+                        </div>
+                        <select class="filter-select">
+                            <option value="">全部分类</option>
+                            <option value="nature">自然场景</option>
+                            <option value="urban">城市场景</option>
+                            <option value="fantasy">奇幻场景</option>
+                            <option value="sci-fi">科幻场景</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">全部状态</option>
+                            <option value="enabled">已启用</option>
+                            <option value="disabled">已禁用</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            批量导出
+                        </button>
+                        <button class="btn btn-primary" onclick="openModal('scene-modal')">
+                            <i class="fas fa-plus"></i>
+                            添加场景
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-table">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>预览图</th>
+                                    <th>场景名称</th>
+                                    <th>分类</th>
+                                    <th>适用年级</th>
+                                    <th>状态</th>
+                                    <th>更新时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                            森林
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">魔法森林</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">阳光透过茂密树叶的神秘森林</div>
+                                    </td>
+                                    <td>自然场景</td>
+                                    <td>3-5年级</td>
+                                    <td><span class="status-badge status-enabled">已启用</span></td>
+                                    <td>2小时前</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text" onclick="openModal('scene-modal')">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                            城堡
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">童话城堡</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">金色夕阳下的梦幻城堡</div>
+                                    </td>
+                                    <td>奇幻场景</td>
+                                    <td>4-6年级</td>
+                                    <td><span class="status-badge status-enabled">已启用</span></td>
+                                    <td>1天前</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                            太空
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">太空站</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">未来科技感的宇宙空间站</div>
+                                    </td>
+                                    <td>科幻场景</td>
+                                    <td>5-6年级</td>
+                                    <td><span class="status-badge status-disabled">已禁用</span></td>
+                                    <td>3天前</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="pagination">
+                    <button class="page-btn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 角色库管理 -->
+            <div class="tab-content" id="characters">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="搜索角色名称或特征...">
+                        </div>
+                        <select class="filter-select">
+                            <option value="">全部类型</option>
+                            <option value="human">人类角色</option>
+                            <option value="animal">动物角色</option>
+                            <option value="fantasy">幻想角色</option>
+                            <option value="robot">机器人</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            添加角色
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-table">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>预览图</th>
+                                    <th>角色名称</th>
+                                    <th>类型</th>
+                                    <th>年龄设定</th>
+                                    <th>性格特征</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                                            🐰
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">小兔贝贝</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">可爱的小白兔</div>
+                                    </td>
+                                    <td>动物角色</td>
+                                    <td>幼儿</td>
+                                    <td>活泼好奇</td>
+                                    <td><span class="status-badge status-enabled">已启用</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                                            🧙‍♂️
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">智慧老人</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">神秘的魔法师</div>
+                                    </td>
+                                    <td>幻想角色</td>
+                                    <td>老年</td>
+                                    <td>睿智神秘</td>
+                                    <td><span class="status-badge status-enabled">已启用</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 风格库管理 -->
+            <div class="tab-content" id="styles">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="搜索风格名称...">
+                        </div>
+                        <select class="filter-select">
+                            <option value="">全部风格</option>
+                            <option value="cartoon">卡通风格</option>
+                            <option value="realistic">写实风格</option>
+                            <option value="watercolor">水彩风格</option>
+                            <option value="anime">动漫风格</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            添加风格
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-table">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>风格预览</th>
+                                    <th>风格名称</th>
+                                    <th>风格类型</th>
+                                    <th>适用场景</th>
+                                    <th>推荐年级</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="width: 80px; height: 50px; background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">
+                                            卡通
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">童话卡通</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">温馨可爱的卡通风格</div>
+                                    </td>
+                                    <td>卡通风格</td>
+                                    <td>童话故事</td>
+                                    <td>3-5年级</td>
+                                    <td><span class="status-badge status-enabled">已启用</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="width: 80px; height: 50px; background: linear-gradient(45deg, #a8edea 0%, #fed6e3 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">
+                                            水彩
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">清新水彩</div>
+                                        <div style="font-size: 12px; color: #8c8c8c;">淡雅的水彩画风格</div>
+                                    </td>
+                                    <td>水彩风格</td>
+                                    <td>自然场景</td>
+                                    <td>4-6年级</td>
+                                    <td><span class="status-badge status-enabled">已启用</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-text">编辑</button>
+                                            <button class="btn-text">预览</button>
+                                            <button class="btn-text" style="color: #ff4d4f;">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 场景编辑模态框 -->
+    <div id="scene-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">添加场景</h3>
+                <button class="modal-close" onclick="closeModal('scene-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">场景名称 *</label>
+                            <input type="text" class="form-input" placeholder="请输入场景名称">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">英文名称</label>
+                            <input type="text" class="form-input" placeholder="Scene Name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">场景分类 *</label>
+                            <select class="form-select">
+                                <option value="">请选择分类</option>
+                                <option value="nature">自然场景</option>
+                                <option value="urban">城市场景</option>
+                                <option value="fantasy">奇幻场景</option>
+                                <option value="sci-fi">科幻场景</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">适用年级</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="grade3">
+                                    <label for="grade3">3年级</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="grade4">
+                                    <label for="grade4">4年级</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="grade5">
+                                    <label for="grade5">5年级</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="grade6">
+                                    <label for="grade6">6年级</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">主要色调</label>
+                            <input type="text" class="form-input" placeholder="如：绿色系、暖色调">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">光线设置</label>
+                            <input type="text" class="form-input" placeholder="如：阳光透过树叶">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">环境特征</label>
+                            <textarea class="form-textarea" placeholder="描述场景的主要特征和元素"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">推荐风格</label>
+                            <input type="text" class="form-input" placeholder="如：卡通、水彩、温馨">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">场景描述</label>
+                    <textarea class="form-textarea" placeholder="详细描述这个场景，包括视觉效果、氛围等"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">AI提示词</label>
+                    <textarea class="form-textarea" placeholder="用于AI生成图像的英文提示词"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">负面提示词</label>
+                    <textarea class="form-textarea" placeholder="需要避免的元素，用英文描述"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('scene-modal')">取消</button>
+                <button class="btn btn-primary">保存场景</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // 更新按钮状态
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // 更新内容区域
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // 模态框控制
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 点击模态框背景关闭
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // 搜索功能
+        document.querySelectorAll('.search-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                // 这里可以添加实际的搜索逻辑
+                console.log('搜索:', searchTerm);
+            });
+        });
+
+        // 表格排序（示例）
+        document.querySelectorAll('.table th').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                console.log('排序列:', th.textContent);
+            });
+        });
+
+        // 批量操作
+        let selectedItems = new Set();
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            const selectAllCheckbox = document.querySelector('.select-all-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+                if (selectAllCheckbox.checked) {
+                    selectedItems.add(checkbox.value);
+                } else {
+                    selectedItems.delete(checkbox.value);
+                }
+            });
+            
+            updateBatchActions();
+        }
+
+        function updateBatchActions() {
+            const batchActions = document.querySelector('.batch-actions');
+            if (selectedItems.size > 0) {
+                batchActions.style.display = 'block';
+            } else {
+                batchActions.style.display = 'none';
+            }
+        }
+
+        // 状态切换动画
+        function toggleStatus(button, itemId) {
+            const badge = button.closest('tr').querySelector('.status-badge');
+            const currentStatus = badge.classList.contains('status-enabled');
+            
+            if (currentStatus) {
+                badge.classList.remove('status-enabled');
+                badge.classList.add('status-disabled');
+                badge.textContent = '已禁用';
+            } else {
+                badge.classList.remove('status-disabled');
+                badge.classList.add('status-enabled');
+                badge.textContent = '已启用';
+            }
+            
+            // 这里可以发送API请求更新状态
+            console.log('切换状态:', itemId, !currentStatus);
+        }
+
+        // 响应式侧边栏
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        }
+
+        // 导航跳转函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('内容管理页面加载完成');
+            
+            // 初始化工具提示
+            const tooltips = document.querySelectorAll('[data-tooltip]');
+            tooltips.forEach(element => {
+                element.title = element.dataset.tooltip;
+            });
+        });
+    </script>
+</body>
+</html> 

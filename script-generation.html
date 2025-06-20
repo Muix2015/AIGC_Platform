@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧本生成 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 电影胶片背景 */
+        .film-strip {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background-image: 
+                linear-gradient(90deg, transparent 0%, transparent 45%, rgba(255, 193, 7, 0.03) 45%, rgba(255, 193, 7, 0.03) 55%, transparent 55%),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 20px, transparent 20px, transparent 40px);
+        }
+
+        /* 容器布局 */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 头部控制台 */
+        .header-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 20px 24px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+
+        .progress-bar {
+            width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, #00A8FF, #FFC107);
+            border-radius: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        .step-info {
+            font-size: 14px;
+            color: #90A4AE;
+        }
+
+        .ai-director {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .ai-director:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        .director-icon {
+            font-size: 20px;
+        }
+
+        .director-text {
+            font-weight: 600;
+            color: #1a237e;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+            min-height: calc(100vh - 300px);
+        }
+
+        /* 分镜展示区 */
+        .storyboard-section {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00A8FF, #FFC107);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .scene-counter {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 14px;
+            color: #FFC107;
+        }
+
+        .storyboard-container {
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .storyboard-track {
+            display: flex;
+            gap: 20px;
+            padding: 10px 0;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .scene-card {
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .scene-card:hover, .scene-card.active {
+            transform: translateY(-5px);
+            border-color: #FFC107;
+            box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+        }
+
+        .scene-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .scene-number {
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            color: #1a237e;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .shot-type {
+            background: rgba(0, 168, 255, 0.2);
+            border: 1px solid rgba(0, 168, 255, 0.4);
+            color: #00A8FF;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .scene-description {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ffffff;
+            margin-bottom: 16px;
+            min-height: 60px;
+        }
+
+        .character-dialogue {
+            background: rgba(124, 77, 255, 0.1);
+            border-left: 3px solid #7C4DFF;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .character-name {
+            font-weight: 600;
+            color: #7C4DFF;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .dialogue-text {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #ffffff;
+        }
+
+        .scene-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: rgba(0, 230, 118, 0.2);
+            border: 1px solid rgba(0, 230, 118, 0.4);
+            color: #00E676;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        /* 导航按钮 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #00A8FF, #0078D4);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+        }
+
+        .nav-btn.prev {
+            left: 10px;
+        }
+
+        .nav-btn.next {
+            right: 10px;
+        }
+
+        /* 右侧编辑面板 */
+        .edit-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .edit-textarea {
+            width: 100%;
+            min-height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .edit-textarea:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .edit-textarea::placeholder {
+            color: #90A4AE;
+        }
+
+        .shot-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: #90A4AE;
+        }
+
+        .control-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .control-select option {
+            background: #1a237e;
+            color: #ffffff;
+            padding: 8px 12px;
+        }
+
+        .control-select option:hover,
+        .control-select option:checked {
+            background: #283593;
+            color: #00E5FF;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .suggestion-btn {
+            background: rgba(124, 77, 255, 0.1);
+            border: 1px solid rgba(124, 77, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #7C4DFF;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(124, 77, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        /* 底部时间轴 */
+        .timeline-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(79, 195, 247, 0.2);
+            padding: 16px;
+            z-index: 100;
+        }
+
+        .timeline-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            color: #90A4AE;
+        }
+
+        .timeline-duration {
+            font-size: 14px;
+            color: #FFC107;
+            font-weight: 600;
+        }
+
+        .timeline-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 40px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .timeline-progress {
+            background: linear-gradient(90deg, #00A8FF, #FFC107);
+            height: 100%;
+            width: 30%;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .timeline-markers {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .timeline-marker {
+            width: 2px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary, .btn-primary {
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .btn-secondary:hover, .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+            }
+
+            .edit-panel {
+                order: -1;
+            }
+
+            .storyboard-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header-control {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .logo-section {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .scene-card {
+                min-width: 280px;
+            }
+
+            .shot-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .btn-group {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00E5FF;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 特殊效果 */
+        .generating {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generating::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.2), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 电影胶片背景 -->
+    <div class="film-strip"></div>
+
+    <div class="container">
+        <!-- 头部控制台 -->
+        <header class="header-control">
+            <div class="logo-section">
+                <div class="logo">🎬 AI剧本工作室</div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="step-info">步骤 4/8: 剧本生成</div>
+            </div>
+            <div class="ai-director" onclick="showDirectorTip()">
+                <span class="director-icon">🎭</span>
+                <span class="director-text">AI导演助手</span>
+            </div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="main-content">
+            <!-- 分镜展示区 -->
+            <section class="storyboard-section">
+                <div class="section-header">
+                    <h1 class="section-title">🎬 分镜头剧本</h1>
+                    <div class="scene-counter">场景 1-5 / 共 12 场</div>
+                </div>
+
+                <div class="storyboard-container">
+                    <div class="storyboard-track" id="storyboardTrack">
+                        <!-- 场景 1 -->
+                        <div class="scene-card active" onclick="selectScene(this, 0)">
+                            <div class="scene-header">
+                                <span class="scene-number">场景 1</span>
+                                <span class="shot-type">全景</span>
+                            </div>
+                            <div class="scene-description">
+                                艾莉的房间，傍晚。房间里昏暗的光线透过窗帘洒在旧电脑上。艾莉好奇地坐在电脑前，手指轻触鼠标。
+                            </div>
+                            <div class="character-dialogue">
+                                <div class="character-name">艾莉</div>
+                                <div class="dialogue-text">"这个程序看起来好奇怪...点击试试看吧。"</div>
+                            </div>
+                            <div class="scene-tags">
+                                <span class="tag">网络安全启蒙</span>
+                            </div>
+                        </div>
+
+                        <!-- 场景 2 -->
+                        <div class="scene-card" onclick="selectScene(this, 1)">
+                            <div class="scene-header">
+                                <span class="scene-number">场景 2</span>
+                                <span class="shot-type">特写</span>
+                            </div>
+                            <div class="scene-description">
+                                电脑屏幕特写，鼠标点击的瞬间，屏幕闪烁着蓝色的光芒，代码和数字在屏幕上快速流动。
+                            </div>
+                            <div class="character-dialogue">
+                                <div class="character-name">系统音效</div>
+                                <div class="dialogue-text">"嘀嘀嘀...连接中...欢迎来到网络世界！"</div>
+                            </div>
+                        </div>
+
+                        <!-- 场景 3 -->
+                        <div class="scene-card" onclick="selectScene(this, 2)">
+                            <div class="scene-header">
+                                <span class="scene-number">场景 3</span>
+                                <span class="shot-type">中景</span>
+                            </div>
+                            <div class="scene-description">
+                                AI网络守护者出现，形象像一个发光的机器人，周围环绕着数据流。背景是数字构成的虚拟空间。
+                            </div>
+                            <div class="character-dialogue">
+                                <div class="character-name">网络守护者</div>
+                                <div class="dialogue-text">"你好，艾莉！我是网络守护者。网络世界遇到了麻烦，需要你的帮助！"</div>
+                            </div>
+                            <div class="scene-tags">
+                                <span class="tag">角色介绍</span>
+                                <span class="tag">AI助手登场</span>
+                            </div>
+                        </div>
+
+                        <!-- 场景 4 -->
+                        <div class="scene-card" onclick="selectScene(this, 3)">
+                            <div class="scene-header">
+                                <span class="scene-number">场景 4</span>
+                                <span class="shot-type">远景</span>
+                            </div>
+                            <div class="scene-description">
+                                网络世界全景，由发光的数据线连接的虚拟城市。但某些区域被黑暗的病毒云团覆盖，显得危险。
+                            </div>
+                            <div class="character-dialogue">
+                                <div class="character-name">艾莉</div>
+                                <div class="dialogue-text">"哇！这里好神奇！但那些黑色的云是什么？"</div>
+                            </div>
+                            <div class="scene-tags">
+                                <span class="tag">世界观建立</span>
+                                <span class="tag">威胁展示</span>
+                            </div>
+                        </div>
+
+                        <!-- 场景 5 -->
+                        <div class="scene-card" onclick="selectScene(this, 4)">
+                            <div class="scene-header">
+                                <span class="scene-number">场景 5</span>
+                                <span class="shot-type">中景</span>
+                            </div>
+                            <div class="scene-description">
+                                网络守护者指向黑暗区域，表情严肃。艾莉专心听讲，眼中闪烁着决心的光芒。
+                            </div>
+                            <div class="character-dialogue">
+                                <div class="character-name">网络守护者</div>
+                                <div class="dialogue-text">"那是病毒军团！它们正在窃取用户信息。学会网络安全知识，我们一起保护大家！"</div>
+                            </div>
+                            <div class="scene-tags">
+                                <span class="tag">网络安全教育</span>
+                                <span class="tag">使命传达</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="nav-btn prev" onclick="previousScene()">‹</button>
+                    <button class="nav-btn next" onclick="nextScene()">›</button>
+                </div>
+            </section>
+
+            <!-- 右侧编辑面板 -->
+            <aside class="edit-panel">
+                <!-- 场景编辑 -->
+                <div class="panel-card">
+                    <h3 class="panel-title">🎬 场景编辑</h3>
+                    <div class="control-group">
+                        <label class="control-label">场景描述</label>
+                        <textarea class="edit-textarea" id="sceneDescription" placeholder="详细描述场景的视觉元素、环境、氛围..."></textarea>
+                    </div>
+                </div>
+
+                <!-- 角色对话 -->
+                <div class="panel-card">
+                    <h3 class="panel-title">💬 角色对话</h3>
+                    <div class="control-group">
+                        <label class="control-label">角色</label>
+                        <select class="control-select" id="characterSelect">
+                            <option value="艾莉">艾莉 (主角)</option>
+                            <option value="网络守护者">网络守护者</option>
+                            <option value="旁白">旁白</option>
+                            <option value="系统音效">系统音效</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">对话内容</label>
+                        <textarea class="edit-textarea" id="dialogueText" placeholder="输入角色对话..."></textarea>
+                    </div>
+                </div>
+
+                <!-- 镜头设置 -->
+                <div class="panel-card">
+                    <h3 class="panel-title">🎥 镜头设置</h3>
+                    <div class="shot-controls">
+                        <div class="control-group">
+                            <label class="control-label">镜头类型</label>
+                            <select class="control-select" id="shotType">
+                                <option value="特写">特写</option>
+                                <option value="中景">中景</option>
+                                <option value="全景">全景</option>
+                                <option value="远景">远景</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">镜头运动</label>
+                            <select class="control-select" id="cameraMovement">
+                                <option value="静止">静止</option>
+                                <option value="推进">推进</option>
+                                <option value="拉远">拉远</option>
+                                <option value="摇摆">摇摆</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI建议 -->
+                <div class="panel-card">
+                    <h3 class="panel-title">🤖 AI导演建议</h3>
+                    <div class="ai-suggestions">
+                        <button class="suggestion-btn" onclick="applyAISuggestion('dialogue')">
+                            💫 优化对话内容
+                        </button>
+                        <button class="suggestion-btn" onclick="applyAISuggestion('scene')">
+                            🎨 丰富场景描述
+                        </button>
+                        <button class="suggestion-btn" onclick="applyAISuggestion('security')">
+                            🛡️ 增强安全教育
+                        </button>
+                        <button class="suggestion-btn" onclick="applyAISuggestion('emotion')">
+                            ❤️ 增加情感表达
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- 底部时间轴 -->
+    <div class="timeline-section">
+        <div class="timeline-container">
+            <div class="timeline-header">
+                <span class="timeline-title">剧本时间轴</span>
+                <span class="timeline-duration">总时长: 4:30 分钟</span>
+            </div>
+            <div class="timeline-track">
+                <div class="timeline-progress"></div>
+                <div class="timeline-markers">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-marker"></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="goBack()">← 修改大纲</button>
+                    <button class="btn-secondary" onclick="regenerateScript()">🔄 重新生成</button>
+                    <button class="btn-secondary" onclick="saveScript()">💾 保存剧本</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="confirmScript()">
+                        确认剧本，生成关键帧 →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSceneIndex = 0;
+        let scenes = [];
+
+        // 初始化场景数据
+        function initializeScenes() {
+            scenes = [
+                {
+                    number: 1,
+                    description: "艾莉的房间，傍晚。房间里昏暗的光线透过窗帘洒在旧电脑上。艾莉好奇地坐在电脑前，手指轻触鼠标。",
+                    character: "艾莉",
+                    dialogue: "这个程序看起来好奇怪...点击试试看吧。",
+                    shotType: "全景",
+                    cameraMovement: "静止",
+                    tags: ["网络安全启蒙"]
+                },
+                {
+                    number: 2,
+                    description: "电脑屏幕特写，鼠标点击的瞬间，屏幕闪烁着蓝色的光芒，代码和数字在屏幕上快速流动。",
+                    character: "系统音效",
+                    dialogue: "嘀嘀嘀...连接中...欢迎来到网络世界！",
+                    shotType: "特写",
+                    cameraMovement: "推进",
+                    tags: ["视觉特效"]
+                },
+                {
+                    number: 3,
+                    description: "AI网络守护者出现，形象像一个发光的机器人，周围环绕着数据流。背景是数字构成的虚拟空间。",
+                    character: "网络守护者",
+                    dialogue: "你好，艾莉！我是网络守护者。网络世界遇到了麻烦，需要你的帮助！",
+                    shotType: "中景",
+                    cameraMovement: "静止",
+                    tags: ["角色介绍", "AI助手登场"]
+                },
+                {
+                    number: 4,
+                    description: "网络世界全景，由发光的数据线连接的虚拟城市。但某些区域被黑暗的病毒云团覆盖，显得危险。",
+                    character: "艾莉",
+                    dialogue: "哇！这里好神奇！但那些黑色的云是什么？",
+                    shotType: "远景",
+                    cameraMovement: "摇摆",
+                    tags: ["世界观建立", "威胁展示"]
+                },
+                {
+                    number: 5,
+                    description: "网络守护者指向黑暗区域，表情严肃。艾莉专心听讲，眼中闪烁着决心的光芒。",
+                    character: "网络守护者",
+                    dialogue: "那是病毒军团！它们正在窃取用户信息。学会网络安全知识，我们一起保护大家！",
+                    shotType: "中景",
+                    cameraMovement: "静止",
+                    tags: ["网络安全教育", "使命传达"]
+                }
+            ];
+        }
+
+        // 选择场景
+        function selectScene(sceneElement, index) {
+            // 移除所有active状态
+            document.querySelectorAll('.scene-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // 添加active状态
+            sceneElement.classList.add('active');
+            currentSceneIndex = index;
+            
+            // 更新编辑面板
+            updateEditPanel();
+        }
+
+        // 更新编辑面板
+        function updateEditPanel() {
+            const scene = scenes[currentSceneIndex];
+            if (scene) {
+                document.getElementById('sceneDescription').value = scene.description;
+                document.getElementById('characterSelect').value = scene.character;
+                document.getElementById('dialogueText').value = scene.dialogue;
+                document.getElementById('shotType').value = scene.shotType;
+                document.getElementById('cameraMovement').value = scene.cameraMovement;
+            }
+        }
+
+        // 上一个场景
+        function previousScene() {
+            const track = document.getElementById('storyboardTrack');
+            const cards = document.querySelectorAll('.scene-card');
+            
+            if (currentSceneIndex > 0) {
+                currentSceneIndex--;
+                selectScene(cards[currentSceneIndex], currentSceneIndex);
+                
+                // 滚动到当前场景
+                const cardWidth = 320; // 300px + 20px gap
+                track.style.transform = `translateX(-${currentSceneIndex * cardWidth}px)`;
+            }
+        }
+
+        // 下一个场景
+        function nextScene() {
+            const track = document.getElementById('storyboardTrack');
+            const cards = document.querySelectorAll('.scene-card');
+            
+            if (currentSceneIndex < cards.length - 1) {
+                currentSceneIndex++;
+                selectScene(cards[currentSceneIndex], currentSceneIndex);
+                
+                // 滚动到当前场景
+                const cardWidth = 320;
+                track.style.transform = `translateX(-${currentSceneIndex * cardWidth}px)`;
+            }
+        }
+
+        // 显示AI导演提示
+        function showDirectorTip() {
+            const tips = [
+                '🎬 每个场景都可以独立编辑，试试调整镜头类型！',
+                '💡 记住在对话中融入网络安全知识！',
+                '🎨 场景描述越详细，生成的关键帧就越精彩！',
+                '🎭 不同的镜头运动会带来不同的视觉效果！'
+            ];
+            
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            alert(randomTip);
+        }
+
+        // 应用AI建议
+        function applyAISuggestion(type) {
+            const scene = scenes[currentSceneIndex];
+            
+            switch(type) {
+                case 'dialogue':
+                    // 优化对话
+                    if (scene.character === '艾莉') {
+                        document.getElementById('dialogueText').value = 
+                            scene.dialogue + ' (我要保护好我的密码！)';
+                    }
+                    break;
+                case 'scene':
+                    // 丰富场景描述
+                    document.getElementById('sceneDescription').value = 
+                        scene.description + ' 光线柔和，营造温馨的氛围。';
+                    break;
+                case 'security':
+                    // 增强安全教育
+                    if (scene.tags.includes('网络安全教育')) {
+                        document.getElementById('dialogueText').value = 
+                            scene.dialogue + ' 记住，永远不要把密码告诉陌生人！';
+                    }
+                    break;
+                case 'emotion':
+                    // 增加情感表达
+                    document.getElementById('sceneDescription').value = 
+                        scene.description + ' 可以看出艾莉内心的好奇和兴奋。';
+                    break;
+            }
+            
+            // 显示应用效果
+            const currentCard = document.querySelector('.scene-card.active');
+            currentCard.classList.add('generating');
+            setTimeout(() => {
+                currentCard.classList.remove('generating');
+            }, 1500);
+        }
+
+        // 重新生成剧本
+        function regenerateScript() {
+            if (confirm('确定要重新生成剧本吗？当前的修改将会丢失。')) {
+                const btn = document.querySelector('.btn-secondary[onclick="regenerateScript()"]');
+                btn.innerHTML = '<div class="loading"></div> 生成中...';
+                btn.disabled = true;
+                
+                // 模拟重新生成
+                setTimeout(() => {
+                    btn.innerHTML = '🔄 重新生成';
+                    btn.disabled = false;
+                    alert('剧本已重新生成！AI导演为你优化了场景描述和对话内容。');
+                }, 3000);
+            }
+        }
+
+        // 保存剧本
+        function saveScript() {
+            const btn = document.querySelector('.btn-secondary[onclick="saveScript()"]');
+            const originalText = btn.textContent;
+            btn.innerHTML = '<div class="loading"></div> 保存中...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '✅ 已保存';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        // 返回上一步
+        function goBack() {
+            if (confirm('确定要返回修改大纲吗？当前的剧本修改将会丢失。')) {
+                window.history.back();
+            }
+        }
+
+        // 确认剧本
+        function confirmScript() {
+            // 保存剧本数据
+            localStorage.setItem('scriptData', JSON.stringify(scenes));
+            
+            setTimeout(() => {
+                window.location.href = 'keyframe-design.html';
+            }, 1000);
+        }
+
+        // 监听编辑面板变化
+        function setupEditListeners() {
+            const sceneDesc = document.getElementById('sceneDescription');
+            const charSelect = document.getElementById('characterSelect');
+            const dialogueText = document.getElementById('dialogueText');
+            const shotType = document.getElementById('shotType');
+            const cameraMovement = document.getElementById('cameraMovement');
+            
+            sceneDesc.addEventListener('input', function() {
+                scenes[currentSceneIndex].description = this.value;
+                updateSceneCard();
+            });
+            
+            charSelect.addEventListener('change', function() {
+                scenes[currentSceneIndex].character = this.value;
+                updateSceneCard();
+            });
+            
+            dialogueText.addEventListener('input', function() {
+                scenes[currentSceneIndex].dialogue = this.value;
+                updateSceneCard();
+            });
+            
+            shotType.addEventListener('change', function() {
+                scenes[currentSceneIndex].shotType = this.value;
+                updateSceneCard();
+            });
+            
+            cameraMovement.addEventListener('change', function() {
+                scenes[currentSceneIndex].cameraMovement = this.value;
+                updateSceneCard();
+            });
+        }
+
+        // 更新场景卡片
+        function updateSceneCard() {
+            const activeCard = document.querySelector('.scene-card.active');
+            const scene = scenes[currentSceneIndex];
+            
+            if (activeCard && scene) {
+                activeCard.querySelector('.scene-description').textContent = scene.description;
+                activeCard.querySelector('.character-name').textContent = scene.character;
+                activeCard.querySelector('.dialogue-text').textContent = scene.dialogue;
+                activeCard.querySelector('.shot-type').textContent = scene.shotType;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScenes();
+            setupEditListeners();
+            updateEditPanel();
+            
+            // 如果有保存的故事大纲，显示相关信息
+            const savedOutline = localStorage.getItem('storyOutline');
+            if (savedOutline) {
+                console.log('基于故事大纲生成的剧本');
+            }
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        saveScript();
+                        break;
+                }
+            }
+            
+            switch(event.key) {
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    previousScene();
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    nextScene();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html> 

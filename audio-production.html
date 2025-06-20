@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配音配乐 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 顶部进度条 */
+        .progress-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 1;
+        }
+
+        .progress-line-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            width: 75%;
+            border-radius: 1px;
+        }
+
+        /* 全局进度指示器 */
+        .global-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        .global-progress-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .global-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            width: 75%;
+            animation: pulse 2s infinite;
+        }
+
+        .global-steps {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #90A4AE;
+            margin-top: 8px;
+        }
+
+        .global-step {
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .global-step.completed {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+        }
+
+        .global-step.current {
+            background: rgba(255, 107, 53, 0.3);
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            background: #1a1a2e;
+            padding: 0 15px;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            border: 2px solid;
+        }
+
+        .step.completed .step-circle {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-color: #ff6b35;
+            color: #ffffff;
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-color: #ff6b35;
+            color: #ffffff;
+            animation: pulse 2s infinite;
+        }
+
+        .step.pending .step-circle {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* 配音区域 */
+        .voice-section {
+            background: rgba(255, 107, 53, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        .voice-section .section-icon {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .character-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 107, 53, 0.5);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .character-card.selected {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.2);
+        }
+
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .character-name {
+            font-size: 14px;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .voice-type {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .voice-controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .voice-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .voice-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .voice-option:hover,
+        .voice-option.selected {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+            color: #ffffff;
+        }
+
+        /* 配乐区域 */
+        .music-section {
+            background: rgba(34, 193, 195, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(34, 193, 195, 0.2);
+        }
+
+        .music-section .section-icon {
+            background: linear-gradient(135deg, #22c1c3, #fdbb2d);
+        }
+
+        .music-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 10px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            border-color: #22c1c3;
+            background: rgba(34, 193, 195, 0.1);
+            color: #ffffff;
+        }
+
+        .music-list {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .music-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .music-item:hover {
+            background: rgba(34, 193, 195, 0.1);
+            transform: translateX(5px);
+        }
+
+        .music-item.selected {
+            background: rgba(34, 193, 195, 0.2);
+            border: 1px solid #22c1c3;
+        }
+
+        .music-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #22c1c3, #fdbb2d);
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .music-info {
+            flex: 1;
+        }
+
+        .music-title {
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .music-mood {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c1c3, #fdbb2d);
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 音频控制台 */
+        .audio-console {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .console-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .waveform-container {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform {
+            height: 120px;
+            display: flex;
+            align-items: end;
+            justify-content: center;
+            gap: 2px;
+            position: relative;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: linear-gradient(to top, #ff6b35, #22c1c3, #fdbb2d);
+            border-radius: 2px;
+            transition: height 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .wave-bar.active {
+            opacity: 1;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        .timeline {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .audio-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .control-title {
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .control-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            opacity: 0.8;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b35, #22c1c3);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+        }
+
+        /* 底部操作按钮 */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .preview-btn {
+            background: linear-gradient(135deg, #22c1c3, #fdbb2d);
+            color: #ffffff;
+        }
+
+        .preview-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(34, 193, 195, 0.4);
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes wave {
+            0%, 100% { height: 20px; }
+            25% { height: 60px; }
+            50% { height: 40px; }
+            75% { height: 80px; }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .progress-steps {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .character-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .audio-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部进度条 -->
+        <div class="progress-header">
+            <div class="global-progress">
+                <span>创作流程进度</span>
+                <div class="global-progress-bar">
+                    <div class="global-progress-fill"></div>
+                </div>
+                <span>步骤 6/8</span>
+            </div>
+            <div class="global-steps">
+                <span class="global-step completed">故事</span>
+                <span class="global-step completed">剧本</span>
+                <span class="global-step completed">关键帧</span>
+                <span class="global-step completed">镜头</span>
+                <span class="global-step completed">合成</span>
+                <span class="global-step current">配音</span>
+                <span class="global-step">预览</span>
+                <span class="global-step">发布</span>
+            </div>
+            <div class="progress-title">🎵 配音配乐制作</div>
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-fill"></div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">故事构思</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">剧本创作</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">画面设计</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">视频生成</div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">配音配乐</div>
+                </div>
+                <div class="step pending">
+                    <div class="step-circle">6</div>
+                    <div class="step-label">作品完成</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 配音区域 -->
+            <div class="voice-section floating">
+                <div class="section-header">
+                    <div class="section-icon">🎤</div>
+                    <div class="section-title">角色配音</div>
+                </div>
+
+                <div class="character-list">
+                    <div class="character-card selected">
+                        <div class="character-avatar">👦</div>
+                        <div class="character-name">小明</div>
+                        <div class="voice-type">少年音</div>
+                    </div>
+                    <div class="character-card">
+                        <div class="character-avatar">👧</div>
+                        <div class="character-name">小红</div>
+                        <div class="voice-type">少女音</div>
+                    </div>
+                    <div class="character-card">
+                        <div class="character-avatar">👨</div>
+                        <div class="character-name">爸爸</div>
+                        <div class="voice-type">成熟男声</div>
+                    </div>
+                    <div class="character-card">
+                        <div class="character-avatar">🦸</div>
+                        <div class="character-name">网络卫士</div>
+                        <div class="voice-type">英雄音</div>
+                    </div>
+                </div>
+
+                <div class="voice-controls">
+                    <div class="control-group">
+                        <label class="control-label">🗣️ 音色选择</label>
+                        <div class="voice-options">
+                            <div class="voice-option selected">温柔</div>
+                            <div class="voice-option">活泼</div>
+                            <div class="voice-option">沉稳</div>
+                            <div class="voice-option">幽默</div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">⚡ 语速调节</label>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>慢</span>
+                                <span>75%</span>
+                                <span>快</span>
+                            </div>
+                            <input type="range" class="slider" min="50" max="150" value="75">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">🎭 情感表达</label>
+                        <div class="voice-options">
+                            <div class="voice-option selected">开心</div>
+                            <div class="voice-option">紧张</div>
+                            <div class="voice-option">惊讶</div>
+                            <div class="voice-option">严肃</div>
+                        </div>
+                    </div>
+
+                    <button class="btn preview-btn" style="width: 100%; margin-top: 15px;">
+                        ▶️ 试听配音效果
+                    </button>
+                </div>
+            </div>
+
+            <!-- 配乐区域 -->
+            <div class="music-section floating" style="animation-delay: 0.2s;">
+                <div class="section-header">
+                    <div class="section-icon">🎵</div>
+                    <div class="section-title">背景音乐</div>
+                </div>
+
+                <div class="music-categories">
+                    <div class="category-btn active">全部</div>
+                    <div class="category-btn">冒险</div>
+                    <div class="category-btn">温馨</div>
+                    <div class="category-btn">紧张</div>
+                    <div class="category-btn">欢快</div>
+                    <div class="category-btn">神秘</div>
+                </div>
+
+                <div class="music-list">
+                    <div class="music-item selected">
+                        <div class="music-cover">🌟</div>
+                        <div class="music-info">
+                            <div class="music-title">网络探险之旅</div>
+                            <div class="music-mood">冒险 · 充满希望</div>
+                        </div>
+                        <button class="play-btn">⏸️</button>
+                    </div>
+                    <div class="music-item">
+                        <div class="music-cover">🎈</div>
+                        <div class="music-info">
+                            <div class="music-title">快乐时光</div>
+                            <div class="music-mood">欢快 · 轻松愉悦</div>
+                        </div>
+                        <button class="play-btn">▶️</button>
+                    </div>
+                    <div class="music-item">
+                        <div class="music-cover">🛡️</div>
+                        <div class="music-info">
+                            <div class="music-title">安全守护</div>
+                            <div class="music-mood">严肃 · 保护感</div>
+                        </div>
+                        <button class="play-btn">▶️</button>
+                    </div>
+                    <div class="music-item">
+                        <div class="music-cover">🌈</div>
+                        <div class="music-info">
+                            <div class="music-title">彩虹桥</div>
+                            <div class="music-mood">温馨 · 治愈系</div>
+                        </div>
+                        <button class="play-btn">▶️</button>
+                    </div>
+                    <div class="music-item">
+                        <div class="music-cover">⚡</div>
+                        <div class="music-info">
+                            <div class="music-title">紧急时刻</div>
+                            <div class="music-mood">紧张 · 刺激感</div>
+                        </div>
+                        <button class="play-btn">▶️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 音频控制台 -->
+        <div class="audio-console floating" style="animation-delay: 0.4s;">
+            <div class="console-header">
+                <div class="console-title">🎚️ 音频工作台</div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" style="padding: 8px 16px;">
+                        🔄 重新生成
+                    </button>
+                    <button class="btn preview-btn" style="padding: 8px 16px;">
+                        👁️ 预览效果
+                    </button>
+                </div>
+            </div>
+
+            <div class="waveform-container">
+                <div class="timeline">
+                    <span>0:00</span>
+                    <span>0:15</span>
+                    <span>0:30</span>
+                    <span>0:45</span>
+                    <span>1:00</span>
+                </div>
+                <div class="waveform">
+                    <div class="wave-bar active" style="height: 20px;"></div>
+                    <div class="wave-bar active" style="height: 45px;"></div>
+                    <div class="wave-bar active" style="height: 30px;"></div>
+                    <div class="wave-bar active" style="height: 60px;"></div>
+                    <div class="wave-bar active" style="height: 25px;"></div>
+                    <div class="wave-bar active" style="height: 50px;"></div>
+                    <div class="wave-bar active" style="height: 35px;"></div>
+                    <div class="wave-bar active" style="height: 70px;"></div>
+                    <div class="wave-bar active" style="height: 40px;"></div>
+                    <div class="wave-bar active" style="height: 55px;"></div>
+                    <div class="wave-bar" style="height: 30px;"></div>
+                    <div class="wave-bar" style="height: 40px;"></div>
+                    <div class="wave-bar" style="height: 25px;"></div>
+                    <div class="wave-bar" style="height: 50px;"></div>
+                    <div class="wave-bar" style="height: 35px;"></div>
+                    <div class="wave-bar" style="height: 45px;"></div>
+                    <div class="wave-bar" style="height: 30px;"></div>
+                    <div class="wave-bar" style="height: 60px;"></div>
+                    <div class="wave-bar" style="height: 40px;"></div>
+                    <div class="wave-bar" style="height: 35px;"></div>
+                </div>
+            </div>
+
+            <div class="audio-controls">
+                <div class="control-panel">
+                    <div class="control-title">
+                        <span class="control-icon">🎤</span>
+                        配音音量
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>主要角色</span>
+                            <span>85%</span>
+                        </div>
+                        <input type="range" class="slider" min="0" max="100" value="85">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>次要角色</span>
+                            <span>70%</span>
+                        </div>
+                        <input type="range" class="slider" min="0" max="100" value="70">
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-title">
+                        <span class="control-icon">🎵</span>
+                        背景音乐
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>音量</span>
+                            <span>45%</span>
+                        </div>
+                        <input type="range" class="slider" min="0" max="100" value="45">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>淡入时间</span>
+                            <span>2秒</span>
+                        </div>
+                        <input type="range" class="slider" min="0" max="10" value="2">
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-title">
+                        <span class="control-icon">⚡</span>
+                        音频效果
+                    </div>
+                    <div class="voice-options" style="grid-template-columns: 1fr;">
+                        <div class="voice-option selected">✨ 音画同步</div>
+                        <div class="voice-option">🔊 智能降噪</div>
+                        <div class="voice-option">🎭 情感增强</div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-title">
+                        <span class="control-icon">⏱️</span>
+                        时间控制
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>配音时长</span>
+                            <span>58秒</span>
+                        </div>
+                        <input type="range" class="slider" min="30" max="120" value="58" readonly>
+                    </div>
+                    <div class="tooltip" data-tooltip="自动匹配视频长度">
+                        <div class="voice-option selected" style="text-align: center; margin-top: 10px;">
+                            🤖 智能时长匹配
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部操作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="goBack()">
+                ← 返回视频制作
+            </button>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn preview-btn" onclick="previewAudio()">
+                    👁️ 完整预览
+                </button>
+                <button class="btn btn-primary" onclick="nextStep()">
+                    完成配音配乐 →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化音波动画
+        function initWaveAnimation() {
+            const waveBars = document.querySelectorAll('.wave-bar.active');
+            waveBars.forEach((bar, index) => {
+                bar.style.animationDelay = `${index * 0.1}s`;
+            });
+        }
+
+        // 角色选择功能
+        function initCharacterSelection() {
+            const characterCards = document.querySelectorAll('.character-card');
+            characterCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    characterCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    // 更新音色选项（示例）
+                    const characterName = this.querySelector('.character-name').textContent;
+                    console.log(`选择了角色: ${characterName}`);
+                });
+            });
+        }
+
+        // 音色选择功能
+        function initVoiceOptions() {
+            const voiceOptions = document.querySelectorAll('.voice-option');
+            voiceOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const parent = this.closest('.voice-options');
+                    if (parent) {
+                        parent.querySelectorAll('.voice-option').forEach(v => v.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        // 音乐分类切换
+        function initMusicCategories() {
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 这里可以添加过滤音乐列表的逻辑
+                    const category = this.textContent;
+                    console.log(`切换到分类: ${category}`);
+                });
+            });
+        }
+
+        // 音乐播放控制
+        function initMusicControls() {
+            const musicItems = document.querySelectorAll('.music-item');
+            const playBtns = document.querySelectorAll('.play-btn');
+            
+            musicItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    musicItems.forEach(m => m.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+
+            playBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // 停止其他播放
+                    playBtns.forEach(b => {
+                        if (b !== this) {
+                            b.textContent = '▶️';
+                        }
+                    });
+                    
+                    // 切换当前按钮状态
+                    if (this.textContent === '▶️') {
+                        this.textContent = '⏸️';
+                        console.log('开始播放音乐');
+                    } else {
+                        this.textContent = '▶️';
+                        console.log('暂停播放音乐');
+                    }
+                });
+            });
+        }
+
+        // 滑块控制
+        function initSliders() {
+            const sliders = document.querySelectorAll('.slider');
+            sliders.forEach(slider => {
+                slider.addEventListener('input', function() {
+                    const parent = this.closest('.slider-container');
+                    const label = parent.querySelector('.slider-label span:last-child');
+                    
+                    if (label) {
+                        const value = this.value;
+                        const min = this.min;
+                        const max = this.max;
+                        
+                        // 根据滑块类型更新显示
+                        if (parent.querySelector('.slider-label').textContent.includes('语速')) {
+                            label.textContent = `${value}%`;
+                        } else if (parent.querySelector('.slider-label').textContent.includes('淡入')) {
+                            label.textContent = `${value}秒`;
+                        } else if (parent.querySelector('.slider-label').textContent.includes('时长')) {
+                            label.textContent = `${value}秒`;
+                        } else {
+                            label.textContent = `${value}%`;
+                        }
+                    }
+                });
+            });
+        }
+
+        // 预览功能
+        function initPreviewFeatures() {
+            const previewBtns = document.querySelectorAll('.preview-btn');
+            previewBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const btnText = this.textContent.trim();
+                    
+                    if (btnText.includes('试听配音')) {
+                        console.log('开始试听配音效果');
+                        // 添加试听逻辑
+                        this.textContent = '⏸️ 停止试听';
+                        setTimeout(() => {
+                            this.textContent = '▶️ 试听配音效果';
+                        }, 3000);
+                    } else if (btnText.includes('预览效果')) {
+                        console.log('预览音频效果');
+                        // 添加音频预览逻辑
+                    } else if (btnText.includes('完整预览')) {
+                        console.log('完整预览作品');
+                        // 添加完整预览逻辑
+                    }
+                });
+            });
+        }
+
+        // 动态更新音波
+        function updateWaveform() {
+            const activeBars = document.querySelectorAll('.wave-bar.active');
+            const inactiveBars = document.querySelectorAll('.wave-bar:not(.active)');
+            
+            // 模拟音频播放进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                
+                if (progress < inactiveBars.length) {
+                    inactiveBars[progress].classList.add('active');
+                }
+                
+                if (progress >= 20) {
+                    clearInterval(interval);
+                    // 重置动画
+                    setTimeout(() => {
+                        document.querySelectorAll('.wave-bar').forEach(bar => {
+                            bar.classList.remove('active');
+                        });
+                        // 重新激活前10个
+                        for (let i = 0; i < 10; i++) {
+                            document.querySelectorAll('.wave-bar')[i].classList.add('active');
+                        }
+                    }, 2000);
+                }
+            }, 200);
+        }
+
+        // 初始化所有功能
+        document.addEventListener('DOMContentLoaded', function() {
+            initWaveAnimation();
+            initCharacterSelection();
+            initVoiceOptions();
+            initMusicCategories();
+            initMusicControls();
+            initSliders();
+            initPreviewFeatures();
+            
+            // 启动音波动画演示
+            setTimeout(updateWaveform, 2000);
+        });
+
+        // 添加一些交互反馈
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // 导航功能
+        function goBack() {
+            if (confirm('确定要返回视频制作阶段吗？当前的配音配乐设置将会保存。')) {
+                window.location.href = 'video-synthesis.html';
+            }
+        }
+
+        function previewAudio() {
+            alert('🎵 正在生成完整预览，包含视频和音频效果...');
+            // 这里可以添加完整预览的逻辑
+        }
+
+        function nextStep() {
+            // 检查是否完成基本配置
+            const selectedCharacter = document.querySelector('.character-card.selected');
+            const selectedMusic = document.querySelector('.music-item.selected');
+            
+            if (!selectedCharacter || !selectedMusic) {
+                alert('请先完成角色配音和背景音乐的选择！');
+                return;
+            }
+            
+            if (confirm('🎉 配音配乐制作完成！您的作品已经准备就绪。\n\n是否进入作品预览阶段？')) {
+                window.location.href = 'work-preview.html';
+            }
+        }
+    </script>
+</body>
+</html>

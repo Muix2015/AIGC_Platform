@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全设置 - AI创意动画管理后台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #262626;
+            line-height: 1.6;
+        }
+
+        /* 顶部导航栏 */
+        .top-header {
+            height: 64px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-btn, .user-menu {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .notification-btn:hover, .user-menu:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 侧边导航栏 */
+        .sidebar {
+            width: 240px;
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 64px;
+            border-right: 1px solid #e8e8e8;
+            overflow-y: auto;
+        }
+
+        .nav-menu {
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-item.active {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #52c41a;
+        }
+
+        .nav-icon {
+            width: 16px;
+            margin-right: 12px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .security-icon {
+            color: #52c41a;
+        }
+
+        .page-description {
+            color: #8c8c8c;
+            font-size: 14px;
+        }
+
+        /* 安全状态概览 */
+        .security-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .security-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #52c41a;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .security-level {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .card-content {
+            font-size: 14px;
+            color: #8c8c8c;
+        }
+
+        /* 标签页 */
+        .security-tabs {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tab-header {
+            display: flex;
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .tab-btn {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #8c8c8c;
+            position: relative;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active {
+            color: #52c41a;
+            background: #fff;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #52c41a;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 表单样式 */
+        .form-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #262626;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #262626;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #52c41a;
+            box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .switch-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 22px;
+            background: #d9d9d9;
+            border-radius: 11px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .switch.active {
+            background: #52c41a;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .switch.active::after {
+            transform: translateX(22px);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #52c41a;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #73d13d;
+        }
+
+        .btn-danger {
+            background: #ff4d4f;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #ff7875;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #52c41a;
+            border: 1px solid #52c41a;
+        }
+
+        .btn-outline:hover {
+            background: #f6ffed;
+        }
+
+        /* 词库管理 */
+        .word-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 16px;
+            background: #fafafa;
+        }
+
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .word-item:last-child {
+            border-bottom: none;
+        }
+
+        .word-text {
+            font-family: monospace;
+            color: #262626;
+        }
+
+        .word-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* 日志面板 */
+        .log-panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 24px;
+        }
+
+        .log-header {
+            padding: 16px 20px;
+            background: #f6ffed;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #52c41a;
+        }
+
+        .log-body {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        .log-time {
+            color: #8c8c8c;
+            min-width: 120px;
+        }
+
+        .log-action {
+            min-width: 80px;
+            font-weight: 600;
+            color: #52c41a;
+        }
+
+        .log-message {
+            flex: 1;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .security-overview {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-header">
+        <div class="logo-section">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <span class="system-title">AI创意动画管理后台</span>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="user-menu">
+                <i class="fas fa-user-circle"></i>
+                <span>管理员</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边导航栏 -->
+    <aside class="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item" onclick="navigateTo('admin-dashboard.html')">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                系统仪表板
+            </div>
+            <div class="nav-item" onclick="navigateTo('content-management.html')">
+                <i class="fas fa-folder-open nav-icon"></i>
+                内容管理
+            </div>
+            <div class="nav-item" onclick="navigateTo('tech-config.html')">
+                <i class="fas fa-cogs nav-icon"></i>
+                技术配置
+            </div>
+            <div class="nav-item" onclick="navigateTo('system-monitor.html')">
+                <i class="fas fa-chart-line nav-icon"></i>
+                系统监控
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-shield-alt nav-icon"></i>
+                安全设置
+            </div>
+        </nav>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-shield-alt security-icon"></i>
+                安全设置
+            </h1>
+            <p class="page-description">管理系统安全策略、内容审核规则和用户访问权限，确保平台安全稳定运行</p>
+        </div>
+
+        <!-- 安全状态概览 -->
+        <div class="security-overview">
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-title">系统安全等级</div>
+                    <div class="security-level">高级</div>
+                </div>
+                <div class="card-content">
+                    所有安全策略已启用，系统运行在高安全模式下
+                </div>
+            </div>
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-title">内容审核状态</div>
+                    <div class="security-level">正常</div>
+                </div>
+                <div class="card-content">
+                    AI审核 + 违规词库双重检测，拦截率99.2%
+                </div>
+            </div>
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-title">访问控制</div>
+                    <div class="security-level">启用</div>
+                </div>
+                <div class="card-content">
+                    精细化权限管理，保护系统资源安全
+                </div>
+            </div>
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-title">风险评估</div>
+                    <div class="security-level">低风险</div>
+                </div>
+                <div class="card-content">
+                    24小时内无安全事件，系统运行稳定
+                </div>
+            </div>
+        </div>
+
+        <!-- 安全设置标签页 -->
+        <div class="security-tabs">
+            <div class="tab-header">
+                <button class="tab-btn active" data-tab="access">
+                    <i class="fas fa-key"></i>
+                    访问控制
+                </button>
+                <button class="tab-btn" data-tab="content">
+                    <i class="fas fa-filter"></i>
+                    内容审核
+                </button>
+                <button class="tab-btn" data-tab="keywords">
+                    <i class="fas fa-ban"></i>
+                    违规词库
+                </button>
+                <button class="tab-btn" data-tab="policy">
+                    <i class="fas fa-clipboard-list"></i>
+                    安全策略
+                </button>
+            </div>
+
+            <!-- 访问控制 -->
+            <div class="tab-content active" id="access">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-users"></i>
+                        用户访问模式
+                    </div>
+                    <div class="form-group">
+                        <div class="switch-item">
+                            <div>
+                                <strong>需要登录访问</strong>
+                                <div style="font-size: 12px; color: #8c8c8c; margin-top: 4px;">
+                                    用户必须注册登录后才能使用平台功能
+                                </div>
+                            </div>
+                            <div class="switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                        <div class="switch-item">
+                            <div>
+                                <strong>允许免登录体验</strong>
+                                <div style="font-size: 12px; color: #8c8c8c; margin-top: 4px;">
+                                    游客可以免登录创作，但功能受限
+                                </div>
+                            </div>
+                            <div class="switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-user-shield"></i>
+                        游客权限设置
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="guest-create" checked>
+                            <label for="guest-create">允许创作功能</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="guest-limit" checked>
+                            <label for="guest-limit">限制作品数量（最多3个）</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="guest-advanced" checked>
+                            <label for="guest-advanced">限制高级功能</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="guest-share">
+                            <label for="guest-share">禁用分享功能</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="guest-export">
+                            <label for="guest-export">禁用导出功能</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-clock"></i>
+                        临时数据管理
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">游客数据保存时间</label>
+                            <select class="form-select">
+                                <option value="1">1天</option>
+                                <option value="7" selected>7天</option>
+                                <option value="30">30天</option>
+                                <option value="90">90天</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">清理策略</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="auto-clean" checked>
+                                    <label for="auto-clean">自动清理过期数据</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="remind-register" checked>
+                                    <label for="remind-register">提醒注册保存</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="btn btn-outline">重置设置</button>
+                    <button class="btn btn-primary" onclick="saveSettings('access')">
+                        <i class="fas fa-save"></i>
+                        保存设置
+                    </button>
+                </div>
+            </div>
+
+            <!-- 内容审核 -->
+            <div class="tab-content" id="content">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-robot"></i>
+                        AI内容审核
+                    </div>
+                    <div class="switch-item">
+                        <div>
+                            <strong>启用AI智能审核</strong>
+                            <div style="font-size: 12px; color: #8c8c8c; margin-top: 4px;">
+                                使用AI模型自动检测不当内容
+                            </div>
+                        </div>
+                        <div class="switch active" onclick="toggleSwitch(this)"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">审核严格程度</label>
+                            <select class="form-select">
+                                <option value="low">宽松</option>
+                                <option value="medium" selected>标准</option>
+                                <option value="high">严格</option>
+                                <option value="strict">极严格</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">审核范围</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="review-text" checked>
+                                    <label for="review-text">文本内容</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="review-image" checked>
+                                    <label for="review-image">生成图像</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="review-audio" checked>
+                                    <label for="review-audio">音频内容</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        违规处理策略
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">轻微违规处理</label>
+                            <select class="form-select">
+                                <option value="warn">警告提示</option>
+                                <option value="edit" selected>要求修改</option>
+                                <option value="block">阻止生成</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">严重违规处理</label>
+                            <select class="form-select">
+                                <option value="block">阻止生成</option>
+                                <option value="report" selected>阻止并记录</option>
+                                <option value="ban">临时封禁用户</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="btn btn-outline">测试审核</button>
+                    <button class="btn btn-primary" onclick="saveSettings('content')">
+                        <i class="fas fa-save"></i>
+                        保存设置
+                    </button>
+                </div>
+            </div>
+
+            <!-- 违规词库 -->
+            <div class="tab-content" id="keywords">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-list"></i>
+                        违规词库管理
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">添加违规词汇</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" class="form-input" placeholder="输入违规词汇" id="new-keyword">
+                            <button class="btn btn-primary" onclick="addKeyword()">
+                                <i class="fas fa-plus"></i>
+                                添加
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">批量导入</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="file" id="keyword-file" accept=".txt,.csv">
+                            <button class="btn btn-outline" onclick="importKeywords()">
+                                <i class="fas fa-upload"></i>
+                                导入文件
+                            </button>
+                            <button class="btn btn-outline" onclick="exportKeywords()">
+                                <i class="fas fa-download"></i>
+                                导出词库
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-search"></i>
+                        词库列表 (共计 <span id="keyword-count">156</span> 个)
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="搜索违规词汇..." id="keyword-search">
+                    </div>
+                    <div class="word-list" id="word-list">
+                        <div class="word-item">
+                            <span class="word-text">暴力</span>
+                            <div class="word-actions">
+                                <button class="btn btn-small btn-outline">编辑</button>
+                                <button class="btn btn-small btn-danger" onclick="removeKeyword(this)">删除</button>
+                            </div>
+                        </div>
+                        <div class="word-item">
+                            <span class="word-text">血腥</span>
+                            <div class="word-actions">
+                                <button class="btn btn-small btn-outline">编辑</button>
+                                <button class="btn btn-small btn-danger" onclick="removeKeyword(this)">删除</button>
+                            </div>
+                        </div>
+                        <div class="word-item">
+                            <span class="word-text">恐怖</span>
+                            <div class="word-actions">
+                                <button class="btn btn-small btn-outline">编辑</button>
+                                <button class="btn btn-small btn-danger" onclick="removeKeyword(this)">删除</button>
+                            </div>
+                        </div>
+                        <div class="word-item">
+                            <span class="word-text">不良内容</span>
+                            <div class="word-actions">
+                                <button class="btn btn-small btn-outline">编辑</button>
+                                <button class="btn btn-small btn-danger" onclick="removeKeyword(this)">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="btn btn-danger">
+                        <i class="fas fa-trash"></i>
+                        清空词库
+                    </button>
+                    <button class="btn btn-primary" onclick="saveSettings('keywords')">
+                        <i class="fas fa-save"></i>
+                        保存更改
+                    </button>
+                </div>
+            </div>
+
+            <!-- 安全策略 -->
+            <div class="tab-content" id="policy">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        数据安全策略
+                    </div>
+                    <div class="switch-item">
+                        <div>
+                            <strong>数据加密存储</strong>
+                            <div style="font-size: 12px; color: #8c8c8c; margin-top: 4px;">
+                                敏感数据采用AES-256加密存储
+                            </div>
+                        </div>
+                        <div class="switch active" onclick="toggleSwitch(this)"></div>
+                    </div>
+                    <div class="switch-item">
+                        <div>
+                            <strong>操作日志记录</strong>
+                            <div style="font-size: 12px; color: #8c8c8c; margin-top: 4px;">
+                                记录所有管理操作和用户行为
+                            </div>
+                        </div>
+                        <div class="switch active" onclick="toggleSwitch(this)"></div>
+                    </div>
+                    <div class="switch-item">
+                        <div>
+                            <strong>IP访问限制</strong>
+                            <div style="font-size: 12px; color: #8c8c8c; margin-top: 4px;">
+                                限制特定IP地址访问管理后台
+                            </div>
+                        </div>
+                        <div class="switch" onclick="toggleSwitch(this)"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-clock"></i>
+                        会话安全设置
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">会话超时时间</label>
+                            <select class="form-select">
+                                <option value="30">30分钟</option>
+                                <option value="60" selected>1小时</option>
+                                <option value="120">2小时</option>
+                                <option value="480">8小时</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">登录失败限制</label>
+                            <select class="form-select">
+                                <option value="3">3次</option>
+                                <option value="5" selected>5次</option>
+                                <option value="10">10次</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="btn btn-outline">恢复默认</button>
+                    <button class="btn btn-primary" onclick="saveSettings('policy')">
+                        <i class="fas fa-save"></i>
+                        保存策略
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 安全日志 -->
+        <div class="log-panel">
+            <div class="log-header">
+                <div class="log-title">
+                    <i class="fas fa-history"></i>
+                    安全操作日志
+                </div>
+                <button class="btn btn-outline btn-small">
+                    <i class="fas fa-download"></i>
+                    导出日志
+                </button>
+            </div>
+            <div class="log-body">
+                <div class="log-item">
+                    <div class="log-time">2024-01-15 14:35:22</div>
+                    <div class="log-action">配置更新</div>
+                    <div class="log-message">更新了内容审核策略设置</div>
+                </div>
+                <div class="log-item">
+                    <div class="log-time">2024-01-15 14:30:18</div>
+                    <div class="log-action">词库管理</div>
+                    <div class="log-message">添加违规词汇: "不当内容"</div>
+                </div>
+                <div class="log-item">
+                    <div class="log-time">2024-01-15 14:25:45</div>
+                    <div class="log-action">安全检查</div>
+                    <div class="log-message">系统安全状态检查完成</div>
+                </div>
+                <div class="log-item">
+                    <div class="log-time">2024-01-15 14:20:33</div>
+                    <div class="log-action">权限变更</div>
+                    <div class="log-message">修改游客访问权限设置</div>
+                </div>
+                <div class="log-item">
+                    <div class="log-time">2024-01-15 14:15:12</div>
+                    <div class="log-action">审核拦截</div>
+                    <div class="log-message">拦截违规内容创作请求</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 导航跳转函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // 标签页切换
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // 更新按钮状态
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // 更新内容区域
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // 开关切换
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // 保存设置
+        function saveSettings(type) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // 添加日志
+                addSecurityLog('配置更新', `保存了${getTabName(type)}设置`);
+                
+                // 显示成功提示
+                showToast('设置保存成功', 'success');
+            }, 1500);
+        }
+
+        function getTabName(type) {
+            const names = {
+                'access': '访问控制',
+                'content': '内容审核',
+                'keywords': '违规词库',
+                'policy': '安全策略'
+            };
+            return names[type] || '未知';
+        }
+
+        // 添加违规词汇
+        function addKeyword() {
+            const input = document.getElementById('new-keyword');
+            const keyword = input.value.trim();
+            
+            if (!keyword) {
+                showToast('请输入违规词汇', 'warning');
+                return;
+            }
+            
+            const wordList = document.getElementById('word-list');
+            const wordItem = document.createElement('div');
+            wordItem.className = 'word-item fade-in';
+            wordItem.innerHTML = `
+                <span class="word-text">${keyword}</span>
+                <div class="word-actions">
+                    <button class="btn btn-small btn-outline">编辑</button>
+                    <button class="btn btn-small btn-danger" onclick="removeKeyword(this)">删除</button>
+                </div>
+            `;
+            
+            wordList.insertBefore(wordItem, wordList.firstChild);
+            input.value = '';
+            
+            // 更新计数
+            updateKeywordCount();
+            
+            // 添加日志
+            addSecurityLog('词库管理', `添加违规词汇: "${keyword}"`);
+            
+            showToast('违规词汇添加成功', 'success');
+        }
+
+        // 删除违规词汇
+        function removeKeyword(button) {
+            const wordItem = button.closest('.word-item');
+            const keyword = wordItem.querySelector('.word-text').textContent;
+            
+            if (confirm(`确定要删除违规词汇 "${keyword}" 吗？`)) {
+                wordItem.remove();
+                updateKeywordCount();
+                addSecurityLog('词库管理', `删除违规词汇: "${keyword}"`);
+                showToast('违规词汇删除成功', 'success');
+            }
+        }
+
+        // 更新词库计数
+        function updateKeywordCount() {
+            const count = document.querySelectorAll('#word-list .word-item').length;
+            document.getElementById('keyword-count').textContent = count;
+        }
+
+        // 导入违规词库
+        function importKeywords() {
+            const fileInput = document.getElementById('keyword-file');
+            if (fileInput.files.length === 0) {
+                showToast('请选择要导入的文件', 'warning');
+                return;
+            }
+            
+            showToast('正在导入词库...', 'info');
+            
+            setTimeout(() => {
+                // 模拟导入过程
+                addSecurityLog('词库管理', '批量导入违规词库');
+                showToast('词库导入成功', 'success');
+                updateKeywordCount();
+            }, 2000);
+        }
+
+        // 导出违规词库
+        function exportKeywords() {
+            showToast('正在导出词库...', 'info');
+            
+            setTimeout(() => {
+                addSecurityLog('词库管理', '导出违规词库');
+                showToast('词库导出成功', 'success');
+            }, 1000);
+        }
+
+        // 添加安全日志
+        function addSecurityLog(action, message) {
+            const logBody = document.querySelector('.log-body');
+            const now = new Date();
+            const time = now.getFullYear() + '-' + 
+                        (now.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                        now.getDate().toString().padStart(2, '0') + ' ' +
+                        now.getHours().toString().padStart(2, '0') + ':' +
+                        now.getMinutes().toString().padStart(2, '0') + ':' +
+                        now.getSeconds().toString().padStart(2, '0');
+            
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item fade-in';
+            logItem.innerHTML = `
+                <div class="log-time">${time}</div>
+                <div class="log-action">${action}</div>
+                <div class="log-message">${message}</div>
+            `;
+            
+            logBody.insertBefore(logItem, logBody.firstChild);
+            
+            // 限制日志数量
+            const logItems = logBody.querySelectorAll('.log-item');
+            if (logItems.length > 20) {
+                logBody.removeChild(logItems[logItems.length - 1]);
+            }
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: '#52c41a',
+                error: '#ff4d4f',
+                warning: '#fa8c16',
+                info: '#1890ff'
+            };
+            
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type]};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                z-index: 2000;
+                animation: fadeIn 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 违规词汇搜索
+        document.getElementById('keyword-search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const wordItems = document.querySelectorAll('#word-list .word-item');
+            
+            wordItems.forEach(item => {
+                const keyword = item.querySelector('.word-text').textContent.toLowerCase();
+                if (keyword.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('安全设置页面加载完成');
+            
+            // 初始化词库计数
+            updateKeywordCount();
+            
+            // 显示欢迎消息
+            setTimeout(() => {
+                showToast('安全设置页面加载完成', 'success');
+            }, 1000);
+        });
+
+        // 添加CSS动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片创作 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 32px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #00E5FF;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: #00E5FF;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tool-button {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(124, 77, 255, 0.4);
+        }
+
+        .tool-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        /* 左侧描述区 */
+        .description-panel {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 24px;
+        }
+
+        .description-section, .style-section, .settings-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .description-textarea {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .description-textarea:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        .description-tools {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* 风格选择 */
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .style-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(79, 195, 247, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .style-item:hover {
+            border-color: #00A8FF;
+            transform: scale(1.05);
+        }
+
+        .style-item.active {
+            border-color: #00E5FF;
+            background: rgba(0, 229, 255, 0.2);
+        }
+
+        .style-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .style-name {
+            font-size: 12px;
+            color: #B0BEC5;
+        }
+
+        /* 设置面板 */
+        .settings-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .setting-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .setting-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .radio-item input[type="radio"] {
+            accent-color: #00A8FF;
+        }
+
+        /* 右侧预览区 */
+        .preview-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            height: fit-content;
+        }
+
+        .preview-area {
+            aspect-ratio: 16/9;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #90A4AE;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .preview-info {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .preview-actions {
+            display: grid;
+            gap: 8px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 12px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 229, 255, 0.3);
+            border-top: 3px solid #00E5FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #00E5FF;
+            font-size: 14px;
+        }
+
+        /* 底部按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .style-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .description-textarea {
+                min-height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <a href="free-creation.html" class="back-button">
+                <span>←</span>
+                <span>返回类型选择</span>
+            </a>
+            <h1 class="page-title">🖼️ 图片创作</h1>
+            <div></div>
+        </header>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <button class="tool-button" onclick="generateImage()">生成图片</button>
+            <button class="tool-button" onclick="regenerateImage()">重新生成</button>
+            <button class="tool-button secondary" onclick="saveImage()">保存作品</button>
+            <button class="tool-button secondary" onclick="shareImage()">分享图片</button>
+            <button class="tool-button secondary" onclick="batchGenerate()">批量生成</button>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 左侧描述和设置区 -->
+            <div class="description-panel">
+                <!-- 画面描述 -->
+                <div class="description-section">
+                    <h3 class="section-title">
+                        <span>📝</span>
+                        <span>画面描述</span>
+                    </h3>
+                    
+                    <textarea 
+                        class="description-textarea" 
+                        placeholder="详细描述你想要创作的画面...
+
+例如：一个美丽的魔法森林，阳光透过树叶洒下金色光芒，小径上有发光的蘑菇，远处有一座神秘的城堡，整体风格梦幻唯美，色彩温暖柔和..."
+                        oninput="handleDescriptionChange()"
+                    >一个美丽的魔法森林，阳光透过树叶洒下金色光芒，小径上有发光的蘑菇，远处有一座神秘的城堡，整体风格梦幻唯美，色彩温暖柔和</textarea>
+                    
+                    <div class="description-tools">
+                        <button class="tool-button" onclick="voiceInput()">🎤 语音输入</button>
+                        <button class="tool-button" onclick="aiSuggestion()">💡 AI建议</button>
+                        <button class="tool-button secondary" onclick="useTemplate()">📚 参考模板</button>
+                        <button class="tool-button secondary" onclick="clearDescription()">🔄 重新描述</button>
+                    </div>
+                </div>
+
+                <!-- 风格选择 -->
+                <div class="style-section">
+                    <h3 class="section-title">
+                        <span>🎨</span>
+                        <span>风格选择</span>
+                    </h3>
+                    
+                    <div class="style-grid">
+                        <div class="style-item active" data-style="fairy-tale">
+                            <span class="style-icon">🧚‍♀️</span>
+                            <div class="style-name">童话插画</div>
+                        </div>
+                        <div class="style-item" data-style="anime">
+                            <span class="style-icon">🎌</span>
+                            <div class="style-name">日式动漫</div>
+                        </div>
+                        <div class="style-item" data-style="realistic">
+                            <span class="style-icon">📷</span>
+                            <div class="style-name">写实摄影</div>
+                        </div>
+                        <div class="style-item" data-style="abstract">
+                            <span class="style-icon">🎭</span>
+                            <div class="style-name">抽象艺术</div>
+                        </div>
+                        <div class="style-item" data-style="watercolor">
+                            <span class="style-icon">🖌️</span>
+                            <div class="style-name">水彩画风</div>
+                        </div>
+                        <div class="style-item" data-style="oil-painting">
+                            <span class="style-icon">🎨</span>
+                            <div class="style-name">油画风格</div>
+                        </div>
+                        <div class="style-item" data-style="cartoon">
+                            <span class="style-icon">🎪</span>
+                            <div class="style-name">卡通漫画</div>
+                        </div>
+                        <div class="style-item" data-style="sci-fi">
+                            <span class="style-icon">🚀</span>
+                            <div class="style-name">科幻未来</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 构图参数 -->
+                <div class="settings-section">
+                    <h3 class="section-title">
+                        <span>📐</span>
+                        <span>构图参数</span>
+                    </h3>
+                    
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <span class="setting-label">比例</span>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="ratio" value="16:9" checked>
+                                    <span>16:9</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="ratio" value="4:3">
+                                    <span>4:3</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="ratio" value="1:1">
+                                    <span>1:1</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="ratio" value="3:4">
+                                    <span>3:4</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <span class="setting-label">构图</span>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="composition" value="center">
+                                    <span>居中</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="composition" value="golden" checked>
+                                    <span>黄金</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="composition" value="symmetric">
+                                    <span>对称</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="composition" value="dynamic">
+                                    <span>动态</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <span class="setting-label">细节</span>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="detail" value="high" checked>
+                                    <span>高</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="detail" value="medium">
+                                    <span>中</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="detail" value="low">
+                                    <span>低</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧预览区 -->
+            <div class="preview-panel">
+                <h3 class="section-title">
+                    <span>🖼️</span>
+                    <span>生成预览</span>
+                </h3>
+                
+                <div class="preview-area" id="previewArea">
+                    <div class="preview-placeholder">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🎨</div>
+                        <div>点击"生成图片"开始创作</div>
+                    </div>
+                </div>
+
+                <div class="preview-info">
+                    <div class="info-row">
+                        <span>尺寸：</span>
+                        <span>1024x768</span>
+                    </div>
+                    <div class="info-row">
+                        <span>风格：</span>
+                        <span>童话插画</span>
+                    </div>
+                    <div class="info-row">
+                        <span>状态：</span>
+                        <span>待生成</span>
+                    </div>
+                </div>
+
+                <div class="preview-actions">
+                    <button class="btn btn-primary" onclick="downloadImage()" disabled id="downloadBtn">下载原图</button>
+                    <button class="btn btn-secondary" onclick="editImage()" disabled id="editBtn">编辑图片</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部动作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="regenerateImage()">重新生成</button>
+            <button class="btn btn-primary" onclick="saveWork()">保存作品</button>
+            <button class="btn btn-secondary" onclick="continueCreate()">继续创作</button>
+        </div>
+    </div>
+
+    <script>
+        // 当前状态
+        let currentStyle = 'fairy-tale';
+        let isGenerating = false;
+
+        // 风格选择
+        document.querySelectorAll('.style-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.style-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                currentStyle = this.dataset.style;
+                updateStyleInfo();
+            });
+        });
+
+        // 更新风格信息
+        function updateStyleInfo() {
+            const styleNames = {
+                'fairy-tale': '童话插画',
+                'anime': '日式动漫',
+                'realistic': '写实摄影',
+                'abstract': '抽象艺术',
+                'watercolor': '水彩画风',
+                'oil-painting': '油画风格',
+                'cartoon': '卡通漫画',
+                'sci-fi': '科幻未来'
+            };
+            document.querySelector('.preview-info .info-row:nth-child(2) span:last-child').textContent = styleNames[currentStyle];
+        }
+
+        // 生成图片
+        function generateImage() {
+            if (isGenerating) return;
+            
+            const description = document.querySelector('.description-textarea').value.trim();
+            if (!description) {
+                alert('请先描述你想要创作的画面');
+                return;
+            }
+
+            isGenerating = true;
+            const previewArea = document.getElementById('previewArea');
+            
+            // 显示加载状态
+            previewArea.innerHTML = `
+                <div class="loading-overlay">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">AI正在创作中...</div>
+                </div>
+            `;
+
+            // 更新状态
+            document.querySelector('.preview-info .info-row:nth-child(3) span:last-child').textContent = '生成中';
+
+            // 模拟生成过程
+            setTimeout(() => {
+                // 模拟生成完成
+                previewArea.innerHTML = `
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxkZWZzPgogICAgICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNDA4MEZGO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM3QzRERkY7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDwvZGVmcz4KICAgIDxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFJ55Sf5oiQ55qE5Zu+54mHPC90ZXh0Pgo8L3N2Zz4=" class="preview-image" alt="生成的图片">
+                `;
+                
+                // 更新状态
+                document.querySelector('.preview-info .info-row:nth-child(3) span:last-child').textContent = '已生成';
+                
+                // 启用按钮
+                document.getElementById('downloadBtn').disabled = false;
+                document.getElementById('editBtn').disabled = false;
+                
+                isGenerating = false;
+            }, 3000);
+        }
+
+        // 重新生成
+        function regenerateImage() {
+            generateImage();
+        }
+
+        // 描述变化处理
+        function handleDescriptionChange() {
+            // 实时更新提示或建议
+        }
+
+        // 语音输入
+        function voiceInput() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.onresult = function(event) {
+                    const result = event.results[0][0].transcript;
+                    document.querySelector('.description-textarea').value = result;
+                };
+                recognition.start();
+            } else {
+                alert('浏览器不支持语音输入');
+            }
+        }
+
+        // AI建议
+        function aiSuggestion() {
+            const suggestions = [
+                '添加更多光影细节',
+                '调整色彩饱和度',
+                '增加前景元素',
+                '优化构图平衡'
+            ];
+            const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+            alert(`AI建议：${randomSuggestion}`);
+        }
+
+        // 使用模板
+        function useTemplate() {
+            const templates = [
+                '一个温馨的小房子，周围有花园和彩虹',
+                '神秘的夜空下，星星闪烁的城堡',
+                '阳光明媚的海滩，有椰子树和海鸥',
+                '秋天的森林，金黄色叶子飘落'
+            ];
+            const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+            document.querySelector('.description-textarea').value = randomTemplate;
+        }
+
+        // 清空描述
+        function clearDescription() {
+            document.querySelector('.description-textarea').value = '';
+        }
+
+        // 下载图片
+        function downloadImage() {
+            alert('图片下载功能开发中...');
+        }
+
+        // 编辑图片
+        function editImage() {
+            alert('图片编辑功能开发中...');
+        }
+
+        // 保存作品
+        function saveWork() {
+            alert('作品已保存！');
+        }
+
+        // 继续创作
+        function continueCreate() {
+            alert('继续创作新的图片...');
+        }
+
+        // 保存图片
+        function saveImage() {
+            saveWork();
+        }
+
+        // 分享图片
+        function shareImage() {
+            alert('分享功能开发中...');
+        }
+
+        // 批量生成
+        function batchGenerate() {
+            alert('批量生成功能开发中...');
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频创作 - AI创意动画平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 32px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #00E5FF;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: #00E5FF;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tool-button {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(124, 77, 255, 0.4);
+        }
+
+        .tool-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        /* 左侧工作区 */
+        .workspace {
+            display: grid;
+            gap: 24px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00E5FF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 视频概念区 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #B0BEC5;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .form-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        /* 分镜列表 */
+        .shot-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .shot-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .shot-thumbnail {
+            width: 80px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px dashed rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #90A4AE;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .shot-info {
+            display: grid;
+            gap: 4px;
+        }
+
+        .shot-title {
+            font-weight: 600;
+            color: #00E5FF;
+        }
+
+        .shot-duration {
+            font-size: 12px;
+            color: #90A4AE;
+        }
+
+        .shot-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: rgba(0, 168, 255, 0.2);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: #00A8FF;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 168, 255, 0.3);
+        }
+
+        /* 右侧预览和设置区 */
+        .sidebar {
+            display: grid;
+            gap: 24px;
+            height: fit-content;
+        }
+
+        /* 视频预览 */
+        .video-preview {
+            aspect-ratio: 16/9;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #90A4AE;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 风格设置 */
+        .style-options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .style-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .style-label {
+            font-size: 14px;
+            color: #B0BEC5;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #B0BEC5;
+        }
+
+        .radio-item input[type="radio"] {
+            accent-color: #00A8FF;
+        }
+
+        /* 进度和状态 */
+        .progress-section {
+            background: rgba(0, 168, 255, 0.1);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00A8FF, #7C4DFF);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #00E5FF;
+        }
+
+        /* 底部按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00A8FF, #7C4DFF);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .shot-item {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .shot-thumbnail {
+                width: 100%;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <a href="free-creation.html" class="back-button">
+                <span>←</span>
+                <span>返回类型选择</span>
+            </a>
+            <h1 class="page-title">🎬 视频创作</h1>
+            <div></div>
+        </header>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <button class="tool-button" onclick="generateVideo()">生成视频</button>
+            <button class="tool-button" onclick="addShot()">添加分镜</button>
+            <button class="tool-button secondary" onclick="previewVideo()">预览播放</button>
+            <button class="tool-button secondary" onclick="exportVideo()">导出视频</button>
+            <button class="tool-button secondary" onclick="shareVideo()">分享作品</button>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 左侧工作区 -->
+            <div class="workspace">
+                <!-- 视频概念 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>📝</span>
+                        <span>视频概念</span>
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">视频标题</label>
+                        <input type="text" class="form-input" value="魔法森林的奇妙冒险" placeholder="输入视频标题">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">内容描述</label>
+                        <textarea class="form-textarea" placeholder="描述视频的主要内容和创意...">小女孩在魔法森林中遇到会说话的动物朋友，一起踏上寻找魔法水晶的冒险旅程</textarea>
+                    </div>
+
+                    <div class="form-controls">
+                        <button class="tool-button" onclick="aiGenerateConcept()">AI生成概念</button>
+                        <button class="tool-button secondary" onclick="manualInput()">手动输入</button>
+                    </div>
+                </div>
+
+                <!-- 分镜列表 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>🎞️</span>
+                        <span>分镜列表</span>
+                    </h3>
+                    
+                    <div class="shot-list">
+                        <div class="shot-item">
+                            <div class="shot-thumbnail">分镜预览</div>
+                            <div class="shot-info">
+                                <div class="shot-title">分镜1：森林入口场景</div>
+                                <div class="shot-duration">时长: 5秒</div>
+                            </div>
+                            <div class="shot-actions">
+                                <button class="action-btn" onclick="editShot(1)">编辑</button>
+                                <button class="action-btn" onclick="deleteShot(1)">删除</button>
+                            </div>
+                        </div>
+
+                        <div class="shot-item">
+                            <div class="shot-thumbnail">分镜预览</div>
+                            <div class="shot-info">
+                                <div class="shot-title">分镜2：角色相遇场景</div>
+                                <div class="shot-duration">时长: 8秒</div>
+                            </div>
+                            <div class="shot-actions">
+                                <button class="action-btn" onclick="editShot(2)">编辑</button>
+                                <button class="action-btn" onclick="deleteShot(2)">删除</button>
+                            </div>
+                        </div>
+
+                        <div class="shot-item">
+                            <div class="shot-thumbnail">分镜预览</div>
+                            <div class="shot-info">
+                                <div class="shot-title">分镜3：魔法展示场景</div>
+                                <div class="shot-duration">时长: 12秒</div>
+                            </div>
+                            <div class="shot-actions">
+                                <button class="action-btn" onclick="editShot(3)">编辑</button>
+                                <button class="action-btn" onclick="deleteShot(3)">删除</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-controls">
+                        <button class="tool-button" onclick="addShot()">添加分镜</button>
+                        <button class="tool-button secondary" onclick="autoGenerate()">自动生成</button>
+                        <button class="tool-button secondary" onclick="reorderShots()">排序</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧预览和设置区 -->
+            <div class="sidebar">
+                <!-- 视频预览 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>🎬</span>
+                        <span>视频预览</span>
+                    </h3>
+                    
+                    <div class="video-preview">
+                        <div class="preview-placeholder">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🎥</div>
+                            <div>视频预览区域</div>
+                            <div style="font-size: 14px; margin-top: 8px;">00:00/02:30</div>
+                        </div>
+                    </div>
+
+                    <div class="video-controls">
+                        <button class="control-btn" onclick="playVideo()">▶️ 播放</button>
+                        <button class="control-btn" onclick="pauseVideo()">⏸️ 暂停</button>
+                        <button class="control-btn" onclick="restartVideo()">🔄 重播</button>
+                    </div>
+                </div>
+
+                <!-- 风格设置 -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <span>🎨</span>
+                        <span>风格设置</span>
+                    </h3>
+                    
+                    <div class="style-options">
+                        <div class="style-group">
+                            <span class="style-label">动画风格</span>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="animation" value="2d" checked>
+                                    <span>2D</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="animation" value="3d">
+                                    <span>3D</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="style-group">
+                            <span class="style-label">画面风格</span>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="style" value="hand-drawn">
+                                    <span>手绘</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="style" value="pixel">
+                                    <span>像素</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="style-group">
+                            <span class="style-label">色彩风格</span>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="color" value="warm" checked>
+                                    <span>温暖</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="color" value="cool">
+                                    <span>冷色</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="color" value="vibrant">
+                                    <span>鲜艳</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="style-group">
+                            <span class="style-label">运动效果</span>
+                            <div style="display: grid; gap: 8px;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #B0BEC5;">
+                                    <input type="checkbox" checked> 镜头推拉
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #B0BEC5;">
+                                    <input type="checkbox" checked> 旋转转场
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #B0BEC5;">
+                                    <input type="checkbox"> 缩放特效
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 生成进度 -->
+                <div class="progress-section">
+                    <div class="progress-text">视频生成进度</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">等待开始</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部动作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="saveDraft()">保存草稿</button>
+            <button class="btn btn-primary" onclick="generateVideo()">生成视频</button>
+            <button class="btn btn-secondary" onclick="continueEdit()">继续编辑</button>
+        </div>
+    </div>
+
+    <script>
+        let isGenerating = false;
+        let shotCount = 3;
+
+        // 生成视频
+        function generateVideo() {
+            if (isGenerating) return;
+            
+            isGenerating = true;
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            // 重置进度
+            progressFill.style.width = '0%';
+            progressText.textContent = '开始生成...';
+            
+            // 模拟生成过程
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                progressFill.style.width = progress + '%';
+                
+                if (progress < 30) {
+                    progressText.textContent = '分析分镜...';
+                } else if (progress < 60) {
+                    progressText.textContent = '生成关键帧...';
+                } else if (progress < 90) {
+                    progressText.textContent = '合成视频...';
+                } else if (progress >= 100) {
+                    progressText.textContent = '生成完成！';
+                    clearInterval(interval);
+                    isGenerating = false;
+                }
+            }, 200);
+        }
+
+        // 添加分镜
+        function addShot() {
+            shotCount++;
+            const shotList = document.querySelector('.shot-list');
+            const newShot = document.createElement('div');
+            newShot.className = 'shot-item';
+            newShot.innerHTML = `
+                <div class="shot-thumbnail">分镜预览</div>
+                <div class="shot-info">
+                    <div class="shot-title">分镜${shotCount}：新场景</div>
+                    <div class="shot-duration">时长: 5秒</div>
+                </div>
+                <div class="shot-actions">
+                    <button class="action-btn" onclick="editShot(${shotCount})">编辑</button>
+                    <button class="action-btn" onclick="deleteShot(${shotCount})">删除</button>
+                </div>
+            `;
+            shotList.appendChild(newShot);
+        }
+
+        // 编辑分镜
+        function editShot(id) {
+            alert(`编辑分镜 ${id}`);
+        }
+
+        // 删除分镜
+        function deleteShot(id) {
+            if (confirm(`确定删除分镜 ${id}？`)) {
+                // 删除逻辑
+                alert(`分镜 ${id} 已删除`);
+            }
+        }
+
+        // AI生成概念
+        function aiGenerateConcept() {
+            alert('AI正在生成视频概念...');
+        }
+
+        // 手动输入
+        function manualInput() {
+            document.querySelector('.form-textarea').focus();
+        }
+
+        // 自动生成分镜
+        function autoGenerate() {
+            alert('AI正在自动生成分镜...');
+        }
+
+        // 重排序分镜
+        function reorderShots() {
+            alert('分镜排序功能开发中...');
+        }
+
+        // 播放视频
+        function playVideo() {
+            alert('播放视频');
+        }
+
+        // 暂停视频
+        function pauseVideo() {
+            alert('暂停视频');
+        }
+
+        // 重播视频
+        function restartVideo() {
+            alert('重播视频');
+        }
+
+        // 预览视频
+        function previewVideo() {
+            alert('预览播放功能开发中...');
+        }
+
+        // 导出视频
+        function exportVideo() {
+            alert('导出视频功能开发中...');
+        }
+
+        // 分享视频
+        function shareVideo() {
+            alert('分享功能开发中...');
+        }
+
+        // 保存草稿
+        function saveDraft() {
+            alert('草稿已保存！');
+        }
+
+        // 继续编辑
+        function continueEdit() {
+            alert('继续编辑...');
+        }
+    </script>
+</body>
+</html> 

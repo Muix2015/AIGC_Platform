@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意动画创作星球 - 加入创作者联盟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 星空背景 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 头部区域 */
+        .header {
+            text-align: center;
+            padding: 40px 20px 60px;
+            background: linear-gradient(135deg, rgba(0, 168, 255, 0.1) 0%, rgba(79, 195, 247, 0.1) 100%);
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #00E5FF;
+            margin-bottom: 16px;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 229, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(0, 229, 255, 0.8), 0 0 40px rgba(0, 229, 255, 0.3); }
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #4FC3F7;
+            opacity: 0.9;
+        }
+
+        /* 主内容区域 */
+        .content-area {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 40px 20px;
+            gap: 60px;
+            align-items: center;
+        }
+
+        /* 左侧头像选择区域 */
+        .avatar-section {
+            flex: 0 0 400px;
+            text-align: center;
+        }
+
+        .avatar-title {
+            font-size: 20px;
+            color: #4FC3F7;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
+        }
+
+        .avatar-selector {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .avatar-selector:hover {
+            border-color: rgba(0, 229, 255, 0.6);
+            box-shadow: 0 12px 40px rgba(0, 229, 255, 0.2);
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .avatar-option {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #00A8FF, #4FC3F7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1) rotateY(15deg);
+            box-shadow: 0 8px 20px rgba(0, 229, 255, 0.4);
+        }
+
+        .avatar-option.selected {
+            border-color: #00E5FF;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+            transform: scale(1.15);
+        }
+
+        .avatar-option::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00E5FF, #4FC3F7, #00A8FF);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .avatar-option:hover::before,
+        .avatar-option.selected::before {
+            opacity: 1;
+        }
+
+        .select-avatar-btn {
+            background: linear-gradient(135deg, #00A8FF, #4FC3F7);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+
+        .select-avatar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 168, 255, 0.5);
+        }
+
+        /* 右侧表单区域 */
+        .form-section {
+            flex: 1;
+            max-width: 450px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-title {
+            font-size: 24px;
+            color: #00E5FF;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #4FC3F7;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #00E5FF;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        .form-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00A8FF, #00E5FF);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 168, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 229, 255, 0.6);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        /* 模式切换 */
+        .mode-toggle {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(79, 195, 247, 0.2);
+        }
+
+        .mode-toggle a {
+            color: #4FC3F7;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .mode-toggle a:hover {
+            color: #00E5FF;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        /* 底部提示区域 */
+        .footer-tips {
+            background: rgba(0, 168, 255, 0.1);
+            border-top: 1px solid rgba(79, 195, 247, 0.3);
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .security-tip {
+            max-width: 800px;
+            margin: 0 auto;
+            color: #4FC3F7;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .security-icon {
+            font-size: 24px;
+            margin-right: 10px;
+            color: #00E676;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content-area {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .avatar-section {
+                flex: none;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .form-section {
+                width: 100%;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .avatar-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+
+            .avatar-option {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+        }
+
+        /* 免登录模式样式 */
+        .guest-mode {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .guest-mode h3 {
+            color: #FFC107;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .guest-mode p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .guest-btn {
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .guest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        /* 粒子效果 */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: #00E5FF;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- 粒子效果 -->
+    <div class="particles" id="particles"></div>
+
+    <div class="main-container">
+        <!-- 头部区域 -->
+        <header class="header">
+            <h1>🌟 AI创意动画创作星球 🌟</h1>
+            <p class="subtitle">加入创意动画创作者联盟，开启无限想象力之旅</p>
+        </header>
+
+        <!-- 主内容区域 -->
+        <div class="content-area">
+            <!-- 左侧头像选择区域 -->
+            <div class="avatar-section">
+                <h2 class="avatar-title">🌌 选择你的全息头像</h2>
+                <div class="avatar-selector">
+                    <div class="avatar-grid" id="avatarGrid">
+                        <div class="avatar-option" data-avatar="artist">🎨</div>
+                        <div class="avatar-option" data-avatar="boy">👦</div>
+                        <div class="avatar-option" data-avatar="superhero">🦸</div>
+                        <div class="avatar-option" data-avatar="hacker">👩‍💻</div>
+                        <div class="avatar-option" data-avatar="ninja">🥋</div>
+                        <div class="avatar-option" data-avatar="scientist">👨‍🔬</div>
+                        <div class="avatar-option" data-avatar="cat">🐱</div>
+                        <div class="avatar-option" data-avatar="robot">🤖</div>
+                        <div class="avatar-option" data-avatar="princess">👸</div>
+                        <div class="avatar-option" data-avatar="wizard">🧙‍♂️</div>
+                        <div class="avatar-option" data-avatar="detective">🕵️</div>
+                        <div class="avatar-option" data-avatar="custom">✨</div>
+                    </div>
+                    <button class="select-avatar-btn" onclick="confirmAvatar()">确认选择头像</button>
+                </div>
+            </div>
+
+            <!-- 右侧表单区域 -->
+            <div class="form-section">
+                <!-- 免登录模式提示 -->
+                <div class="guest-mode" id="guestMode">
+                    <h3>🎁 快速体验模式</h3>
+                    <p>无需注册，立即开始创作精彩动画！</p>
+                    <button class="guest-btn" onclick="enterGuestMode()">立即开始创作</button>
+                    <button class="guest-btn" onclick="hideGuestMode()" style="background: linear-gradient(135deg, #4FC3F7, #00A8FF);">注册保存作品</button>
+                </div>
+
+                <div class="form-container">
+                    <h2 class="form-title">创建创作者档案</h2>
+                    
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="school">🏫 学校名称</label>
+                            <input type="text" id="school" class="form-input" placeholder="请输入学校名称" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="grade">🎓 年级选择</label>
+                            <select id="grade" class="form-select" required>
+                                <option value="">请选择年级</option>
+                                <option value="1">一年级</option>
+                                <option value="2">二年级</option>
+                                <option value="3">三年级</option>
+                                <option value="4">四年级</option>
+                                <option value="5">五年级</option>
+                                <option value="6">六年级</option>
+                                <option value="7">七年级</option>
+                                <option value="8">八年级</option>
+                                <option value="9">九年级</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentId">📋 学号</label>
+                            <input type="text" id="studentId" class="form-input" placeholder="请输入学号" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="realName">👤 真实姓名</label>
+                            <input type="text" id="realName" class="form-input" placeholder="请输入真实姓名" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">🔐 密码设置</label>
+                            <input type="password" id="password" class="form-input" placeholder="请设置安全密码" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">🔐 确认密码</label>
+                            <input type="password" id="confirmPassword" class="form-input" placeholder="请再次输入密码" required>
+                        </div>
+
+                        <button type="submit" class="submit-btn">🚀 开始创作之旅</button>
+                    </form>
+
+                    <div class="mode-toggle">
+                        <a href="#" onclick="switchToLogin()">已有账户？立即登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部提示区域 -->
+        <footer class="footer-tips">
+            <div class="security-tip">
+                <span class="security-icon">🛡️</span>
+                <strong>网络安全小贴士：</strong>设置强密码保护你的创作世界，不要向陌生人透露个人信息，做一个聪明的网络小卫士！
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 星空背景生成
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const starCount = 150;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // 粒子效果
+        function createParticles() {
+            const container = document.getElementById('particles');
+            
+            setInterval(() => {
+                if (container.children.length < 10) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+                    particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    container.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 6000);
+                }
+            }, 500);
+        }
+
+        // 头像选择功能
+        let selectedAvatar = null;
+
+        document.getElementById('avatarGrid').addEventListener('click', function(e) {
+            if (e.target.classList.contains('avatar-option')) {
+                // 移除之前的选择
+                document.querySelectorAll('.avatar-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+
+                // 添加新选择
+                e.target.classList.add('selected');
+                selectedAvatar = e.target.dataset.avatar;
+            }
+        });
+
+        function confirmAvatar() {
+            if (selectedAvatar) {
+                alert(`太棒了！你选择了 ${document.querySelector(`[data-avatar="${selectedAvatar}"]`).textContent} 作为你的创作头像！`);
+            } else {
+                alert('请先选择一个头像哦！');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const school = document.getElementById('school').value;
+            const grade = document.getElementById('grade').value;
+            const studentId = document.getElementById('studentId').value;
+            const realName = document.getElementById('realName').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // 表单验证
+            if (!selectedAvatar) {
+                alert('请先选择一个头像！');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('两次输入的密码不一致，请重新输入！');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('密码长度至少6位，请设置更安全的密码！');
+                return;
+            }
+
+            // 模拟注册成功
+            alert(`欢迎加入创作者联盟，${realName}同学！\n学校：${school}\n年级：${grade}年级\n学号：${studentId}\n你的创作档案已创建成功，现在可以开始创作精彩的动画故事了！`);
+            
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1000);
+        });
+
+        // 免登录模式
+        function enterGuestMode() {
+            alert('欢迎体验AI创意动画创作！\n在免登录模式下，你的作品将临时保存，注册后可永久保存所有创作。');
+            
+            setTimeout(() => {
+                window.location.href = 'dashboard.html?mode=guest';
+            }, 1000);
+        }
+
+        function hideGuestMode() {
+            document.getElementById('guestMode').style.display = 'none';
+        }
+
+        // 切换到登录模式
+        function switchToLogin() {
+            const formContainer = document.querySelector('.form-container');
+            formContainer.innerHTML = `
+                <h2 class="form-title">登录创作者账户</h2>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginSchool">🏫 学校名称</label>
+                        <input type="text" id="loginSchool" class="form-input" placeholder="请输入学校名称" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginAccount">👤 学号/姓名</label>
+                        <input type="text" id="loginAccount" class="form-input" placeholder="请输入学号或姓名" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">🔐 密码</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="请输入密码" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">🚀 进入创作世界</button>
+                </form>
+
+                <div class="mode-toggle">
+                    <a href="#" onclick="location.reload()">没有账户？立即注册</a>
+                </div>
+            `;
+
+            // 重新绑定登录表单事件
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const school = document.getElementById('loginSchool').value;
+                const account = document.getElementById('loginAccount').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                // 基本验证
+                if (!school || !account || !password) {
+                    alert('请填写完整的登录信息！');
+                    return;
+                }
+                
+                alert(`欢迎回来！\n学校：${school}\n账户：${account}\n正在进入你的创作世界...`);
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            });
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            createParticles();
+            
+            // 默认选择第一个头像
+            document.querySelector('.avatar-option').click();
+        });
+
+        // 添加输入框焦点动画
+        document.querySelectorAll('.form-input, .form-select').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html> 
